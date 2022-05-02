@@ -36,7 +36,7 @@ from PyQt5 import QtWidgets
 from Common.common_resources import CONNECTION_NETWORK_SEPARATOR
 from Common.common_resources import M_None
 from Common.common_resources import TEMPLATE_ARC_APPLICATION
-from Common.common_resources import TEMPLATE_CONNECTION_NETWORK
+from Common.common_resources import TEMPLATE_INTERCONNECTION_NETWORK, TEMPLATE_INTRACONNECTION_NETWORK
 from Common.common_resources import TEMPLATE_INTER_NODE_OBJECT
 from Common.common_resources import TEMPLATE_INTRA_NODE_OBJECT
 from Common.common_resources import TEMPLATE_INTRA_NODE_OBJECT_WITH_TOKEN
@@ -698,8 +698,8 @@ class OntologyContainer():
 
   def __makeConnectionNetworks(self):
 
-    intraconnectionNetworks = {}  # OrderedDict()
-    interconnectionNetworks = {}  # OrderedDict()
+    intraconnectionNetworks = {}
+    interconnectionNetworks = {}
     network_leaves = self.list_leave_networks
     n_leaves = len(network_leaves)
     for i in range(0, n_leaves):
@@ -710,35 +710,30 @@ class OntologyContainer():
         l_type = self.ontology_tree[l]["type"]
         r_type = self.ontology_tree[r]["type"]
         type = "inter"
-        if (l_type == "intra") & (r_type == "intra"):  # TODO: needs a check on common ancestor network
+        # RULE: both connected networks being intra --> intraface
+        # TODO: needs a check on common ancestor network
+        if (l_type == "intra") & (r_type == "intra"):
           type = "intra"
         if type == "inter":
-          cnw = TEMPLATE_CONNECTION_NETWORK % (l, r)
+          cnw = TEMPLATE_INTERCONNECTION_NETWORK % (l)
           interconnectionNetworks[cnw] = {
-                  "left" : l,
-                  "right": r,
-                  "type" : type
-                  }
-          cnw = TEMPLATE_CONNECTION_NETWORK % (r, l)  # NOTE: left-right right-left both are enabled
-          interconnectionNetworks[cnw] = {
-                  "left" : r,
-                  "right": l,
+                  "from" : l,
                   "type" : type
                   }
         else:
-          cnw = TEMPLATE_CONNECTION_NETWORK % (l, r)
+          cnw = TEMPLATE_INTRACONNECTION_NETWORK % (l, r)
           intraconnectionNetworks[cnw] = {
                   "left" : l,
                   "right": r,
                   "type" : type
                   }
-          cnw = TEMPLATE_CONNECTION_NETWORK % (l, l)
+          cnw = TEMPLATE_INTRACONNECTION_NETWORK % (l, l)
           intraconnectionNetworks[cnw] = {
                   "left" : l,
                   "right": l,
                   "type" : type
                   }
-          cnw = TEMPLATE_CONNECTION_NETWORK % (r, r)
+          cnw = TEMPLATE_INTRACONNECTION_NETWORK % (r, r)
           intraconnectionNetworks[cnw] = {
                   "left" : r,
                   "right": r,
@@ -748,30 +743,25 @@ class OntologyContainer():
       r = network_leaves[i]
       type = "intra"
       # RULE: but intraconnections within are enabled
-      cnw = TEMPLATE_CONNECTION_NETWORK % (l, r)
+      cnw = TEMPLATE_INTRACONNECTION_NETWORK % (l, r)
       intraconnectionNetworks[cnw] = {
               "left" : l,
               "right": r,
               "type" : type
               }
-      cnw = TEMPLATE_CONNECTION_NETWORK % (l, l)
+      cnw = TEMPLATE_INTRACONNECTION_NETWORK % (l, l)
       intraconnectionNetworks[cnw] = {
               "left" : l,
               "right": l,
               "type" : type
               }
-      cnw = TEMPLATE_CONNECTION_NETWORK % (r, r)
+      cnw = TEMPLATE_INTRACONNECTION_NETWORK % (r, r)
       intraconnectionNetworks[cnw] = {
               "left" : r,
               "right": r,
               "type" : type
               }
-      # cnw = TEMPLATE_CONNECTION_NETWORK%(r, l)
-      # intraconnectionNetworks[cnw] = {
-      #       "left" : r,
-      #       "right": l,
-      #       "type" : type
-      #       }
+
     return interconnectionNetworks, intraconnectionNetworks
 
   def __makeListOfLeaveNames(self):
