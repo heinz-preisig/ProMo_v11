@@ -727,6 +727,9 @@ class Commander(QtCore.QObject):
       # print("__c11_addTheArc", " from network %s to network %s"%(source_network,sink_network))
 
       # introducing boundary
+      print("debugging -- finding out if it is inter or intra face")
+
+
       # RULE s :
       # RULE: - boundary can only be introduced automatically, not manually  --> automaton
       # RULE: - both sides of the boundaries are in-arcs  --> controlled here
@@ -1395,7 +1398,7 @@ class Commander(QtCore.QObject):
     #   nodeIDs = [pars["nodeID"]]
     flat_topology = self.model_container.makeFlatTopology()
     nodeIDs = list(flat_topology["nodes"].keys())
-    vars_to_be_instantiated = self.__getVarsToBeInstantiated(nodeIDs)
+    # vars_to_be_instantiated = self.__getVarsToBeInstantiated(nodeIDs)
 
     print("__c52__InstantiateObject ", flat_topology)
     # print("__c52__InstantiateObject -- not yet implemented", pars, self.model_container["nodes"][pars["nodeID"]])
@@ -1404,41 +1407,41 @@ class Commander(QtCore.QObject):
     #   print("debugging -- behaviour:", selected_entity_behaviour)
     return
 
-  def __getVarsToBeInstantiated(self, nodeIDs):
-    entity_behaviours = {}
-    for ID in nodeIDs:
-      entity_behaviours[ID] = self.__getEntityBehaviour(ID)
-    vars_to_be_instantiated = {}
-    for ID in nodeIDs:
-      if entity_behaviours[ID]:
-        vars_to_be_instantiated[ID] = entity_behaviours[ID]["to_be_initialised"]
-
-    print("debugging -- behaviours")
-    return vars_to_be_instantiated
-
-
-  def __getEntityBehaviour(self, nodeID):
-    selected_entity_behaviour = None
-    entity_behaviours = self.model_container.ontology.entity_behaviours
-    entity = self.model_container["nodes"][nodeID]["type"]
-    entity_nw = self.model_container["nodes"][nodeID]["network"]
-    #RULE: intra have no parameters -- hopefully
-    if entity != "intra":
-      nws = list(self.model_container.ontology.intra_domains.keys())
-      for nw in nws:
-        if entity_nw in self.model_container.ontology.intra_domains[nw]:
-          entity_domain = self.model_container.ontology.intra_domains[nw][0]
-      tokens = sorted(self.model_container["nodes"][nodeID]["tokens"].keys())
-      entity_objects = []
-      for t in tokens:
-        # RULE: we pick the default version. For the time being there is no choice given
-        entity_objects.append("%s.node.%s|%s.default" % (entity_domain, entity, t))
-      for obj in entity_objects:
-        for ent in sorted(entity_behaviours.keys()):
-          if obj in ent:
-            print("found it", ent)
-            selected_entity_behaviour = entity_behaviours[ent]
-    return selected_entity_behaviour
+  # def __getVarsToBeInstantiated(self, nodeIDs):
+  #   entity_behaviours = {}
+  #   for ID in nodeIDs:
+  #     entity_behaviours[ID] = self.__getEntityBehaviour(ID)
+  #   vars_to_be_instantiated = {}
+  #   for ID in nodeIDs:
+  #     if entity_behaviours[ID]:
+  #       vars_to_be_instantiated[ID] = entity_behaviours[ID]["to_be_initialised"]
+  #
+  #   print("debugging -- behaviours")
+  #   return vars_to_be_instantiated
+  #
+  #
+  # def __getEntityBehaviour(self, nodeID):
+  #   selected_entity_behaviour = None
+  #   entity_behaviours = self.model_container.ontology.entity_behaviours
+  #   entity = self.model_container["nodes"][nodeID]["type"]
+  #   entity_nw = self.model_container["nodes"][nodeID]["network"]
+  #   #RULE: intra have no parameters -- hopefully
+  #   if entity != "intra":
+  #     nws = list(self.model_container.ontology.intra_domains.keys())
+  #     for nw in nws:
+  #       if entity_nw in self.model_container.ontology.intra_domains[nw]:
+  #         entity_domain = self.model_container.ontology.intra_domains[nw][0]
+  #     tokens = sorted(self.model_container["nodes"][nodeID]["tokens"].keys())
+  #     entity_objects = []
+  #     for t in tokens:
+  #       # RULE: we pick the default version. For the time being there is no choice given
+  #       entity_objects.append("%s.node.%s|%s.default" % (entity_domain, entity, t))
+  #     for obj in entity_objects:
+  #       for ent in sorted(entity_behaviours.keys()):
+  #         if obj in ent:
+  #           print("found it", ent)
+  #           selected_entity_behaviour = entity_behaviours[ent]
+  #   return selected_entity_behaviour
 
   # ===================================================================
   def __setName(self, node, name):

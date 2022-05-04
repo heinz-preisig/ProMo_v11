@@ -36,7 +36,7 @@ from PyQt5 import QtWidgets
 from Common.common_resources import CONNECTION_NETWORK_SEPARATOR
 from Common.common_resources import M_None
 from Common.common_resources import TEMPLATE_ARC_APPLICATION
-from Common.common_resources import TEMPLATE_INTERCONNECTION_NETWORK, TEMPLATE_INTRACONNECTION_NETWORK
+from Common.common_resources import TEMPLATE_INTERCONNECTION_NETWORK, TEMPLATE_INTRACONNECTION_NETWORK, TEMPLATE_INTRACONNECTION_PAIRS
 from Common.common_resources import TEMPLATE_INTER_NODE_OBJECT
 from Common.common_resources import TEMPLATE_INTRA_NODE_OBJECT
 from Common.common_resources import TEMPLATE_INTRA_NODE_OBJECT_WITH_TOKEN
@@ -715,9 +715,16 @@ class OntologyContainer():
         if (l_type == "intra") & (r_type == "intra"):
           type = "intra"
         if type == "inter":
-          cnw = TEMPLATE_INTERCONNECTION_NETWORK % (l)
+          cnw = TEMPLATE_INTRACONNECTION_NETWORK % (l, r)
           interconnectionNetworks[cnw] = {
-                  "from" : l,
+                  "left" : l,
+                  "right": r,
+                  "type" : type
+                  }
+          cnw = TEMPLATE_INTRACONNECTION_NETWORK % (r, l)  # NOTE: left-right right-left both are enabled
+          interconnectionNetworks[cnw] = {
+                  "left" : r,
+                  "right": l,
                   "type" : type
                   }
         else:
@@ -805,9 +812,9 @@ class OntologyContainer():
     for i in range(0, l):
       for j in range(i, l):
         if i != j:  # Note: interconnections are unidirectional thus we need both ways
-          pair = TEMPLATE_CONNECTION_NETWORK % (interbranches[i], interbranches[j])
+          pair = TEMPLATE_INTRACONNECTION_PAIRS % (interbranches[i], interbranches[j])
           interbranch_pairs.append(pair)
-          pair = TEMPLATE_CONNECTION_NETWORK % (interbranches[j], interbranches[i])
+          pair = TEMPLATE_INTRACONNECTION_PAIRS % (interbranches[j], interbranches[i])
           interbranch_pairs.append(pair)
 
     # print("debugging -- end interbranches", interbranches)

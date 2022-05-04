@@ -187,12 +187,6 @@ class UiOntologyDesign(QMainWindow):
     self.ui.combo_InterConnectionNetwork.clear()
     self.ui.combo_IntraConnectionNetwork.clear()
     self.ui.combo_InterConnectionNetwork.addItems(sorted(self.interconnection_nws_list))
-
-    # RULE: intraconnections are defined when defining the tokens
-    # nws = set()
-    # for nw in self.ontology_container.token_definition_nw:
-    #   nws.add(self.ontology_container.token_definition_nw[nw])
-    # nws = sorted(list(nws))
     nws = self.ontology_container.networks
     self.ui.combo_IntraConnectionNetwork.addItems(nws) #intraconnection_nws_list))
 
@@ -414,7 +408,7 @@ class UiOntologyDesign(QMainWindow):
 
   @QtCore.pyqtSlot(int)
   def on_tabWidget_currentChanged(self, which):
-    # print("debugging -- changed tab")
+    print("debugging -- changed tab")
     self.ui.combo_EditVariableTypes.hide()
 
   def __setupEditInterface(self):
