@@ -446,8 +446,8 @@ class UiOntologyDesign(QMainWindow):
                                                 self.current_network,
                                                 hide_vars=already_defined_variables,
                                                 enabled_types=enabled_var_classes)
-      self.pick.show()
       self.pick.picked.connect(self.makeLinkEquation)
+      self.pick.exec_()
       print("debugging pick table")
 
   def __alreadyDefinedVariables(self):
@@ -510,6 +510,8 @@ class UiOntologyDesign(QMainWindow):
     self.variables.addNewVariable(ID=new_var_ID, **variable_record)
     self.ontology_container.indexEquations()
     self.variables.indexVariables()
+    self.pick.close()
+    self.__setupEditInterface()
 
 
     print("debugging -- link_equation", link_equation)
