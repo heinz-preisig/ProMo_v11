@@ -21,17 +21,17 @@ from Common.resources_icons import roundButton
 from OntologyBuilder.OntologyEquationEditor.variable_table import VariableTable
 
 
-class UI_VariableTablePick(VariableTable):
+class UI_VariableTableInterfacePick(VariableTable):
   """
   dialog for a variable
   emits a signal on completion
   """
-
-  completed = QtCore.pyqtSignal(str)
-  picked = QtCore.pyqtSignal(str)
-  new_variable = QtCore.pyqtSignal(str)
-  new_equation = QtCore.pyqtSignal(str, str)
-  deleted_symbol = QtCore.pyqtSignal(str)
+  #
+  # completed = QtCore.pyqtSignal(str)
+  picked = QtCore.pyqtSignal(int)
+  # new_variable = QtCore.pyqtSignal(str)
+  # new_equation = QtCore.pyqtSignal(str, str)
+  # deleted_symbol = QtCore.pyqtSignal(str)
 
   def __init__(self,
                title,
@@ -98,10 +98,10 @@ class UI_VariableTablePick(VariableTable):
     self.ui.tableVariable.setSortingEnabled(True)
 
   def on_tableVariable_itemClicked(self, item):
-    r = int(item.row())
+    row = int(item.row())
     item = self.ui.tableVariable.item
-    self.selected_variable_symbol = str(item(r, 1).text())
-    self.picked.emit(self.selected_variable_symbol)
+    var_ID = int(item(row,9).text()) #str(item(row, 1).text())
+    self.picked.emit(var_ID)
     return
 
   def on_tableVariable_itemDoubleClicked(self, item):

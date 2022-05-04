@@ -164,6 +164,12 @@ class VariableTable(QtWidgets.QDialog):
     s = QtCore.QSize(x, y)
     self.resize(s)
 
+  def hideVars(self, list_of_IDs):
+    for id in self.variables_in_table:
+      if id in list_of_IDs:
+        index = self.variables_in_table.index(id)
+        self.ui.tableVariable.hideRow(index)
+
   def __tabSizeHint(self):
     tab = self.ui.tableVariable
     width = 0

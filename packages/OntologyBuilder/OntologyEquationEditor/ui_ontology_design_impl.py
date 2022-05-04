@@ -42,14 +42,14 @@ from Common.common_resources import makeTreeView
 from Common.common_resources import putData
 from Common.common_resources import saveBackupFile
 from Common.ontology_container import OntologyContainer
+from Common.pop_up_message_box import makeMessageBox
 from Common.record_definitions import RecordIndex
 from Common.record_definitions import makeCompletEquationRecord
+from Common.record_definitions import makeCompleteVariableRecord
 from Common.resource_initialisation import DIRECTORIES
 from Common.resource_initialisation import FILES
 from Common.resources_icons import getIcon
 from Common.resources_icons import roundButton
-from Common.pop_up_message_box import makeMessageBox
-from Common.ui_source_sink_linking_impl import UI_SourceSinkLinking
 from Common.ui_text_browser_popup_impl import UI_FileDisplayWindow
 from OntologyBuilder.OntologyEquationEditor.resources import CODE
 from OntologyBuilder.OntologyEquationEditor.resources import ENABLED_COLUMNS
@@ -63,6 +63,7 @@ from OntologyBuilder.OntologyEquationEditor.tpg import WrongToken
 from OntologyBuilder.OntologyEquationEditor.ui_aliastableindices_impl import UI_AliasTableIndices
 from OntologyBuilder.OntologyEquationEditor.ui_aliastablevariables_impl import UI_AliasTableVariables
 from OntologyBuilder.OntologyEquationEditor.ui_equations_impl import UI_Equations
+from OntologyBuilder.OntologyEquationEditor.ui_interface_variable_pick_impl import UI_VariableTableInterfacePick
 from OntologyBuilder.OntologyEquationEditor.ui_ontology_design import Ui_OntologyDesigner
 from OntologyBuilder.OntologyEquationEditor.ui_variabletable_impl import UI_VariableTableDialog
 from OntologyBuilder.OntologyEquationEditor.ui_variabletable_show_impl import UI_VariableTableShow
@@ -188,7 +189,7 @@ class UiOntologyDesign(QMainWindow):
     self.ui.combo_IntraConnectionNetwork.clear()
     self.ui.combo_InterConnectionNetwork.addItems(sorted(self.interconnection_nws_list))
     nws = self.ontology_container.networks
-    self.ui.combo_IntraConnectionNetwork.addItems(nws) #intraconnection_nws_list))
+    self.ui.combo_IntraConnectionNetwork.addItems(nws)  # intraconnection_nws_list))
 
     self.ui.combo_InterConnectionNetwork.show()
     self.ui.combo_IntraConnectionNetwork.show()
@@ -203,13 +204,13 @@ class UiOntologyDesign(QMainWindow):
     self.compile_only = True
 
     if not self.ontology_container.checkForRule("name_space"):
-      answer = makeMessageBox(message="the nature of the name space handling must be defined -- run OntologyFoundationDesigner",
-                              buttons=["OK"]
-                              )
+      answer = makeMessageBox(
+        message="the nature of the name space handling must be defined -- run OntologyFoundationDesigner",
+        buttons=["OK"]
+        )
       exit(-1)
     else:
       self.global_name_space = self.ontology_container.rules["name_space"]
-
 
     # self.__compile("latex")
     # self.__compile("python")
@@ -220,7 +221,7 @@ class UiOntologyDesign(QMainWindow):
     print("debugging -- global name space", self.global_name_space)
     if self.global_name_space:
       answer = makeMessageBox(message="this is a global name space ontology do you want to change it",
-                              buttons = ["yes", "no"],
+                              buttons=["yes", "no"],
                               infotext="Gives you a possibility of the change to local name spaces -- for the time being one cannot change the other way around")
       if answer == "YES":
         self.__changeFromGlobalToLocal()
@@ -393,8 +394,8 @@ class UiOntologyDesign(QMainWindow):
         except:
           pass
           # return
-      else:
-        self.__setupEdit("interface")
+      # else:
+      #   self.__setupEdit("interface")
 
       self.__setupEditInterface()
       self.__showFilesControl()
@@ -421,58 +422,95 @@ class UiOntologyDesign(QMainWindow):
     set_left_variables = set()
     set_right_variables = set()
     list_link_equations = []
-    for e in range(len(self.equations)):
-      (equ, var, variable_class, nw, equ_text) = self.equation_information[e]
-      equ_record = self.ontology_container.equation_dictionary[equ]
-      equ_type = equ_record["type"]
-      equ_nw = equ_record["network"]
-      if "In" in variable_class:
-        print("debugging -- found one", variable_class)
-      index = self.variables[var].index_structures   # index is a list of integers !
-      if (1 in index) or (2 in index):  # RULE: both must be arcs or node
-        if nw in left_nw:
-          if "Out" in variable_class:
-            set_left_variables.add(var) #(var, equ_text))
-        if nw in right_nw:
-          if "In" in variable_class:
-            set_right_variables.add(var) #(var, equ_text))
-      if equ_type == "interface_link_equation":
-        if equ_nw == self.current_network:
-          list_link_equations.append((var, int(equ_record["incidence_list"][0]), equ))
+    enabled_var_classes = list(self.variables.index_accessible_variables_on_networks[left_nw].keys())
 
-    print("debugging -- variable lists", set_left_variables, set_right_variables)
+    # RULE: what to hide -- all that have already be put into the interface
+    already_defined_variables = self.__alreadyDefinedVariables()
 
+    for var_class in enabled_var_classes:
+      for var_ID in self.variables.index_accessible_variables_on_networks[left_nw][var_class]:
+        set_left_variables.add(var_ID)
+    print("debugging -- variable lists", set_left_variables)  # , set_right_variables)
 
-    if (len(set_left_variables) == 0) or (len(set_right_variables) == 0):
-      self.__writeMessage("no link possible")
-    else:
+    if self.global_name_space:
       self.__writeMessage("define link")
-      self.dialog_interface = UI_SourceSinkLinking(left_nw, sorted(set_left_variables), right_nw, sorted(set_right_variables), list_link_equations, self.variables)
-      self.dialog_interface.selected.connect(self.makeLinkEquation)
-      self.dialog_interface.delete_equ.connect(self.deleteLinkEquation)
-      self.dialog_interface.exec_()
+      self.__writeMessage("currently not possible")
+      # self.dialog_interface = UI_SourceSinkLinking(left_nw, sorted(set_left_variables), right_nw, sorted(set_right_variables), list_link_equations, self.variables)
+      # self.dialog_interface.selected.connect(self.makeLinkEquation)
+      # self.dialog_interface.delete_equ.connect(self.deleteLinkEquation)
+      # self.dialog_interface.exec_()
 
+    else:
+      self.pick = UI_VariableTableInterfacePick("make interface cut equation",
+                                                self.variables, self.indices,
+                                                self.current_network,
+                                                hide_vars=already_defined_variables,
+                                                enabled_types=enabled_var_classes)
+      self.pick.show()
+      self.pick.picked.connect(self.makeLinkEquation)
+      print("debugging pick table")
 
-  def makeLinkEquation(self, list):
+  def __alreadyDefinedVariables(self):
+    already_defined_variables = set()
+    for var_ID in self.variables:
+      if self.variables[var_ID].network == self.current_network:
+        symbol = self.variables[var_ID].label
+        already_defined_variables.add(symbol)
+    already_defined_variables = list(already_defined_variables)
+    return already_defined_variables
+
+  # def makeLinkEquation(self, list):
+  def makeLinkEquation(self, var_ID):
     # print("debugging -- link equation : %s := %s"%(list[1], list[0]))
-    self.variables[list[0]].language = "global_ID"
-    rhs = str(self.variables[list[0]])
-    print("debugging -- rhs :", rhs)
-
-    left_ID = int(list[0])
-    right_ID = int(list[1])
+    # self.variables[list[0]].language = "global_ID"
+    # rhs = str(self.variables[list[0]])
+    # print("debugging -- rhs :", rhs)
+    #
+    # left_ID = int(list[0])
+    # right_ID = int(list[1])
 
     # link_equation = makeLinkEquationRecord(lhs_ID=list[1], rhs_ID=list[0], network=self.current_network,
     #                                        incidence_list=self.variables[list[0]].index_structures)
-    incident_list = makeIncidentList(rhs)
+
+    self.variables[var_ID].language = "global_ID"
+    rhs = str(self.variables[var_ID])
+    symbol = self.variables[var_ID].label
+    index_structures = self.variables[var_ID].index_structures
+    units = self.variables[var_ID].units
+    tokens = []
+
+    # TODO: this variable class/type should be centralised. Is currently hard wired in more than one place.
+    variable_type = "get"
+
+    incident_list = [str(var_ID)]
     link_equation = makeCompletEquationRecord(rhs=rhs,
                                               type="interface_link_equation",
                                               network=self.current_network,
                                               doc="interface equation",
                                               incidence_list=incident_list)
+    new_var_ID = self.variables.newProMoVariableIRI()
+    new_equ_ID = self.variables.newProMoEquationIRI()  # globalEquationID(update=True)  # RULE: for global ID
 
-    self.variables.addEquation(right_ID, link_equation)
+    variable_record = makeCompleteVariableRecord(new_var_ID,
+                                                 label=symbol,
+                                                 type=variable_type,
+                                                 network=self.current_network,
+                                                 doc="link variable %s to interface %s" % (
+                                                 symbol, self.current_network),
+                                                 index_structures=index_structures,
+                                                 units=units,
+                                                 equations={
+                                                         new_equ_ID: link_equation
+                                                         },
+                                                 aliases={},
+                                                 port_variable=False,
+                                                 tokens=tokens,
+                                                 )
+
+    self.variables.addNewVariable(ID=new_var_ID, **variable_record)
     self.ontology_container.indexEquations()
+    self.variables.indexVariables()
+
 
     print("debugging -- link_equation", link_equation)
 
@@ -485,7 +523,7 @@ class UiOntologyDesign(QMainWindow):
     # vars_types_on_network_expression = self.ontology_container.interfaces[nw]["left_variable_classes"]
 
   def deleteLinkEquation(self, equ_ID, var_ID):
-    print("debugging -- deleting equation " , var_ID, equ_ID)
+    print("debugging -- deleting equation ", var_ID, equ_ID)
     self.variables[var_ID].removeEquation(equ_ID)
     self.ontology_container.indexEquations()
 
@@ -652,7 +690,7 @@ class UiOntologyDesign(QMainWindow):
       compiled_label = str(self.variables[lhs_var_ID])
       expression = renderExpressionFromGlobalIDToInternal(expression_ID, self.variables, self.indices)
       if "Root" in expression:
-        self.variables.to_define_variable_name = self.variables[lhs_var_ID].label #aliases["global_ID"]
+        self.variables.to_define_variable_name = self.variables[lhs_var_ID].label  # aliases["global_ID"]
       compiler = makeCompiler(self.variables, self.indices, lhs_var_ID, equ_ID, language=language)
 
       try:
@@ -674,7 +712,7 @@ class UiOntologyDesign(QMainWindow):
               VarError,
               ) as _m:
         print('checked expression failed %s : %s = %s -- %s' % (
-                        equ_ID, self.variables[lhs_var_ID].label, expression, _m))
+                equ_ID, self.variables[lhs_var_ID].label, expression, _m))
 
         compiler = makeCompiler(self.variables, self.indices, lhs_var_ID, equ_ID, language=language, verbose=100)
         try:
@@ -721,7 +759,7 @@ class UiOntologyDesign(QMainWindow):
     f.close()
 
   def __cleanStrings(self, string):
-    cleaned_string = string.replace("_"," ").title()
+    cleaned_string = string.replace("_", " ").title()
     return cleaned_string
 
   def __makeLatexDocument(self):
@@ -737,25 +775,24 @@ class UiOntologyDesign(QMainWindow):
     # main.tex
     names_names_for_variables = []
     if self.global_name_space:
-      nw_list = self.networks  + self.intraconnection_nws_list #+ self.interconnection_nws_list
+      nw_list = self.networks + self.intraconnection_nws_list  # + self.interconnection_nws_list
     else:
-      nw_list = self.networks  + self.intraconnection_nws_list + self.interconnection_nws_list
+      nw_list = self.networks + self.intraconnection_nws_list + self.interconnection_nws_list
     for nw in nw_list:
       names_names_for_variables.append(str(nw).replace(CONNECTION_NETWORK_SEPARATOR, '--'))
 
-    e_types = sorted( self.variables.equation_type_list )
+    e_types = sorted(self.variables.equation_type_list)
     e_types_cleaned = []
     for e in e_types:
       e_types_cleaned.append(self.__cleanStrings(e))
 
-
     j2_env = Environment(loader=FileSystemLoader(this_dir), trim_blocks=True)
-    body = j2_env.get_template(FILES["latex_template_main"]).render(ontology=names_names_for_variables, equationTypes=e_types_cleaned)  # self.networks)
+    body = j2_env.get_template(FILES["latex_template_main"]).render(ontology=names_names_for_variables,
+                                                                    equationTypes=e_types_cleaned)  # self.networks)
     f_name = FILES["latex_main"] % self.ontology_name
     f = open(f_name, 'w')
     f.write(body)
     f.close()
-
 
     for nw in self.networks + self.interconnection_nws_list + self.intraconnection_nws_list:
       index_dictionary = self.variables.index_definition_network_for_variable_component_class
@@ -772,8 +809,6 @@ class UiOntologyDesign(QMainWindow):
       f = open(f_name, 'w')
       f.write(body)
       f.close()
-
-
 
     print("debugging tex rep")
     for e_type in self.variables.equation_type_list:
@@ -1219,4 +1254,3 @@ class UiOntologyDesign(QMainWindow):
                 print("change name space", variable_ID, variable_network, v_ID, network_v)
                 # TODO: introduce code for generating a cut equation and delete the direct link equation.
                 found = True
-    
