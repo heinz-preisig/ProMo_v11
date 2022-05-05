@@ -36,13 +36,13 @@ from pydotplus.graphviz import Node
 
 from Common.common_resources import CONNECTION_NETWORK_SEPARATOR
 from Common.common_resources import UI_String
+from Common.common_resources import VARIABLE_TYPE_INTERFACES
 from Common.common_resources import getData
 from Common.common_resources import getOntologyName
 from Common.common_resources import makeTreeView
 from Common.common_resources import putData
 from Common.common_resources import saveBackupFile
 from Common.ontology_container import OntologyContainer
-from Common.pop_up_message_box import makeMessageBox
 from Common.record_definitions import RecordIndex
 from Common.record_definitions import makeCompletEquationRecord
 from Common.record_definitions import makeCompleteVariableRecord
@@ -203,14 +203,14 @@ class UiOntologyDesign(QMainWindow):
 
     self.compile_only = True
 
-    if not self.ontology_container.checkForRule("name_space"):
-      answer = makeMessageBox(
-        message="the nature of the name space handling must be defined -- run OntologyFoundationDesigner",
-        buttons=["OK"]
-        )
-      exit(-1)
-    else:
-      self.global_name_space = self.ontology_container.rules["name_space"]
+    # if not self.ontology_container.checkForRule("name_space"):
+    #   answer = makeMessageBox(
+    #           message="the nature of the name space handling must be defined -- run OntologyFoundationDesigner",
+    #           buttons=["OK"]
+    #           )
+    #   exit(-1)
+    # else:
+    #   self.global_name_space = self.ontology_container.rules["name_space"]
 
     # self.__compile("latex")
     # self.__compile("python")
@@ -218,13 +218,13 @@ class UiOntologyDesign(QMainWindow):
     # self.__compile("matlab")
 
     # self.__makeDotGraphs()
-    print("debugging -- global name space", self.global_name_space)
-    if self.global_name_space:
-      answer = makeMessageBox(message="this is a global name space ontology do you want to change it",
-                              buttons=["yes", "no"],
-                              infotext="Gives you a possibility of the change to local name spaces -- for the time being one cannot change the other way around")
-      if answer == "YES":
-        self.__changeFromGlobalToLocal()
+    # print("debugging -- global name space", self.global_name_space)
+    # if self.global_name_space:
+    #   answer = makeMessageBox(message="this is a global name space ontology do you want to change it",
+    #                           buttons=["yes", "no"],
+    #                           infotext="Gives you a possibility of the change to local name spaces -- for the time being one cannot change the other way around")
+    #   if answer == "YES":
+    #     self.__changeFromGlobalToLocal()
     return
 
   def on_pushInfo_pressed(self):
@@ -314,7 +314,11 @@ class UiOntologyDesign(QMainWindow):
 
   def on_pushShowVariables_pressed(self):
     # print("debugging -- make variable table")
-    enabled_var_types = self.variable_types_on_networks[self.current_network]
+    if self.current_network in self.ontology_container.interfaces:
+      print("debugging")
+      enabled_var_types = VARIABLE_TYPE_INTERFACES
+    else:
+      enabled_var_types = self.variable_types_on_networks[self.current_network]
     variable_table = UI_VariableTableShow("All defined variables",
                                           self.ontology_container,
                                           self.variables,
@@ -388,15 +392,15 @@ class UiOntologyDesign(QMainWindow):
     if self.ui.radioVariablesAliases.isChecked():
       self.on_radioVariablesAliases_pressed()
     else:
-      if self.global_name_space:
-        try:
-          self.dialog_interface.close()
-        except:
-          pass
-          # return
+      #   if self.global_name_space:
+      #     try:
+      #       self.dialog_interface.close()
+      #     except:
+      #       pass
+      # return
       # else:
       #   self.__setupEdit("interface")
-
+      # self.__setupEdit("interface")
       self.__setupEditInterface()
       self.__showFilesControl()
 
@@ -420,44 +424,53 @@ class UiOntologyDesign(QMainWindow):
     self.equation_inverse_index = self.ontology_container.equation_inverse_index
     print("debugging -- left and right network:", left_nw, right_nw)
     set_left_variables = set()
-    set_right_variables = set()
-    list_link_equations = []
     enabled_var_classes = list(self.variables.index_accessible_variables_on_networks[left_nw].keys())
 
     # RULE: what to hide -- all that have already be put into the interface
-    already_defined_variables = self.__alreadyDefinedVariables()
+    already_defined_variables, not_yet_defined_variables = self.__alreadyDefinedVariables()
 
     for var_class in enabled_var_classes:
       for var_ID in self.variables.index_accessible_variables_on_networks[left_nw][var_class]:
         set_left_variables.add(var_ID)
     print("debugging -- variable lists", set_left_variables)  # , set_right_variables)
 
-    if self.global_name_space:
-      self.__writeMessage("define link")
-      self.__writeMessage("currently not possible")
-      # self.dialog_interface = UI_SourceSinkLinking(left_nw, sorted(set_left_variables), right_nw, sorted(set_right_variables), list_link_equations, self.variables)
-      # self.dialog_interface.selected.connect(self.makeLinkEquation)
-      # self.dialog_interface.delete_equ.connect(self.deleteLinkEquation)
-      # self.dialog_interface.exec_()
+    # if self.global_name_space:
+    #   self.__writeMessage("define link")
+    #   self.__writeMessage("currently not possible")
+    # self.dialog_interface = UI_SourceSinkLinking(left_nw, sorted(set_left_variables), right_nw, sorted(set_right_variables), list_link_equations, self.variables)
+    # self.dialog_interface.selected.connect(self.makeLinkEquation)
+    # self.dialog_interface.delete_equ.connect(self.deleteLinkEquation)
+    # self.dialog_interface.exec_()
 
-    else:
-      self.pick = UI_VariableTableInterfacePick("make interface cut equation",
-                                                self.variables, self.indices,
-                                                self.current_network,
-                                                hide_vars=already_defined_variables,
-                                                enabled_types=enabled_var_classes)
-      self.pick.picked.connect(self.makeLinkEquation)
-      self.pick.exec_()
-      print("debugging pick table")
+    # else:
+    self.pick = UI_VariableTableInterfacePick("make interface cut equation",
+                                              self.variables, self.indices,
+                                              self.current_network,
+                                              hide_vars=already_defined_variables,
+                                              enabled_types=enabled_var_classes)
+    self.pick.picked.connect(self.makeLinkEquation)
+    self.pick.exec_()
+    # self.show_interface_variables = UI_VariableTableInterfacePick("show interface variables",
+    #                                           self.variables, self.indices,
+    #                                           self.current_network,
+    #                                           hide_vars=not_yet_defined_variables,
+    #                                           enabled_types=enabled_var_classes)
+    # self.show_interface_variables.exec_()
+
+    # print("debugging pick table")
 
   def __alreadyDefinedVariables(self):
     already_defined_variables = set()
+    all_variables_in_interface = set()
     for var_ID in self.variables:
+      symbol = self.variables[var_ID].label
+      all_variables_in_interface.add(symbol)
       if self.variables[var_ID].network == self.current_network:
-        symbol = self.variables[var_ID].label
         already_defined_variables.add(symbol)
+    not_yet_defined_variables = all_variables_in_interface - already_defined_variables
     already_defined_variables = list(already_defined_variables)
-    return already_defined_variables
+    not_yet_defined_variables = list(not_yet_defined_variables)
+    return already_defined_variables, not_yet_defined_variables
 
   # def makeLinkEquation(self, list):
   def makeLinkEquation(self, var_ID):
@@ -480,7 +493,7 @@ class UiOntologyDesign(QMainWindow):
     tokens = []
 
     # TODO: this variable class/type should be centralised. Is currently hard wired in more than one place.
-    variable_type = "get"
+    variable_type = VARIABLE_TYPE_INTERFACES
 
     incident_list = [str(var_ID)]
     link_equation = makeCompletEquationRecord(rhs=rhs,
@@ -496,7 +509,7 @@ class UiOntologyDesign(QMainWindow):
                                                  type=variable_type,
                                                  network=self.current_network,
                                                  doc="link variable %s to interface %s" % (
-                                                 symbol, self.current_network),
+                                                         symbol, self.current_network),
                                                  index_structures=index_structures,
                                                  units=units,
                                                  equations={
@@ -512,7 +525,6 @@ class UiOntologyDesign(QMainWindow):
     self.variables.indexVariables()
     self.pick.close()
     self.__setupEditInterface()
-
 
     print("debugging -- link_equation", link_equation)
 
@@ -602,7 +614,7 @@ class UiOntologyDesign(QMainWindow):
                               network_for_expression,
                               vars_types_on_network_variable,
                               vars_types_on_network_expression,
-                              global_name_space=self.global_name_space
+                              # global_name_space=self.global_name_space
                               )
     self.ui_eq.update_space_information.connect(self.__updateVariableTable)
 
@@ -776,10 +788,10 @@ class UiOntologyDesign(QMainWindow):
 
     # main.tex
     names_names_for_variables = []
-    if self.global_name_space:
-      nw_list = self.networks + self.intraconnection_nws_list  # + self.interconnection_nws_list
-    else:
-      nw_list = self.networks + self.intraconnection_nws_list + self.interconnection_nws_list
+    # if self.global_name_space:
+    #   nw_list = self.networks + self.intraconnection_nws_list  # + self.interconnection_nws_list
+    # else:
+    nw_list = self.networks + self.intraconnection_nws_list + self.interconnection_nws_list
     for nw in nw_list:
       names_names_for_variables.append(str(nw).replace(CONNECTION_NETWORK_SEPARATOR, '--'))
 
@@ -1131,19 +1143,19 @@ class UiOntologyDesign(QMainWindow):
   def __setupVariableTable(self):
     choice = self.current_variable_type
     if self.current_network in self.interconnection_nws:
-      if self.global_name_space:
-        network_variable = self.current_network  # self.interconnection_nws[self.current_network]["right"]
-        network_expression = network_variable  # self.interconnection_nws[self.current_network]["left"]
-      else:
-        network_variable = self.interconnection_nws[self.current_network]["right"]
-        network_expression = self.interconnection_nws[self.current_network]["left"]
+      # if self.global_name_space:
+      #   network_variable = self.current_network  # self.interconnection_nws[self.current_network]["right"]
+      #   network_expression = network_variable  # self.interconnection_nws[self.current_network]["left"]
+      # else:
+      network_variable = self.interconnection_nws[self.current_network]["right"]
+      network_expression = self.interconnection_nws[self.current_network]["left"]
     elif self.current_network in self.intraconnection_nws:
-      if self.global_name_space:
-        network_variable = self.current_network  # self.intraconnection_nws[self.current_network]["right"]
-        network_expression = self.current_network  # self.intraconnection_nws[self.current_network]["left"]
-      else:
-        network_variable = self.intraconnection_nws[self.current_network]["right"]
-        network_expression = self.intraconnection_nws[self.current_network]["left"]
+      # if self.global_name_space:
+      #   network_variable = self.current_network  # self.intraconnection_nws[self.current_network]["right"]
+      #   network_expression = self.current_network  # self.intraconnection_nws[self.current_network]["left"]
+      # else:
+      network_variable = self.intraconnection_nws[self.current_network]["right"]
+      network_expression = self.intraconnection_nws[self.current_network]["left"]
     else:
       network_variable = self.current_network
       network_expression = self.current_network
@@ -1154,7 +1166,7 @@ class UiOntologyDesign(QMainWindow):
       hide = ["port"]
     else:
       hide = []
-    hide.extend(["LaTex", "dot"])
+    hide.extend(["LaTex", "dot", "next"])
     self.table_variables = UI_VariableTableDialog("create & edit variables",
                                                   self.variables,
                                                   self.indices,
@@ -1164,7 +1176,7 @@ class UiOntologyDesign(QMainWindow):
                                                   network_expression,
                                                   choice,
                                                   info_file=FILES["info_ontology_variable_table"],
-                                                  hidden=hide,
+                                                  hidden_buttons=hide,
                                                   )
     self.table_variables.show()  # Note: resolved tooltip settings, did not work during initialisation of table (
     # ui_variabletable_implement)

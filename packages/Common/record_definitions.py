@@ -28,6 +28,7 @@ from collections import OrderedDict
 from OntologyBuilder.OntologyEquationEditor.resources import CODE
 from OntologyBuilder.OntologyEquationEditor.resources import LANGUAGES
 from OntologyBuilder.OntologyEquationEditor.variable_framework import Units
+from Common.common_resources import VARIABLE_TYPE_INTERFACES
 
 TEMPLATES = {
         "incidence_matrix"          : "F_%s_%s",  # %(token, transfer_mechanism)
@@ -219,7 +220,7 @@ class Interface(dict):  # ......................................................
     self["right_network"] = right_network
     self["left_variable_classes"] = left_variable_classes
     # self["internal_variable_classes"] = ["transform", "constant"]  # ..... RULE: hard wired interface variable class
-    self["internal_variable_classes"] = ["get"] #["transform", "constant", "stateInfo", "response", "control"]  # ..... RULE: hard wired interface variable class
+    self["internal_variable_classes"] = [VARIABLE_TYPE_INTERFACES] #["transform", "constant", "stateInfo", "response", "control"]  # ..... RULE: hard wired interface variable class
     self["token"] = "information"  # ..................................... RULE: hard wired token
     self["mechanism"] = "link"  # ........................................ RULE: hard wired mechanism
     self["nature"] = "unidirectional"  # ................................. RULE: hard wired tranfer nature

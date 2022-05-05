@@ -63,7 +63,7 @@ class UI_VariableTableInterfacePick(VariableTable):
 
     VariableTable.__init__(self,
                            title,
-                           "variable_picking",
+                           "interface_picking",
                            variables,
                            indices,
                            network,
@@ -73,23 +73,19 @@ class UI_VariableTableInterfacePick(VariableTable):
                            hide_columns,
                            info_file=info_file
                            )
-    buttons = {}
-    buttons["back"] = self.ui.pushFinished
-    buttons["info"] = self.ui.pushInfo
-    buttons["new"] = self.ui.pushNew
-    buttons["port"] = self.ui.pushPort
-    buttons["dot"] = self.ui.pushDot
-    buttons["tex"] = self.ui.pushLaTex
+    buttons = self.buttons
 
-    hidden = ["new", "port", "info", "dot", "tex"]
+    showButtons = {"back": roundButton(buttons["back"], "back", tooltip="go back"),
+                   # "info": roundButton(buttons["info"], "info", tooltip="information"),
+                   # "new" : roundButton(buttons["new"], "dependent_variable", tooltip="new dependent variable"),
+                   # "port": roundButton(buttons["port"], "port", tooltip="new port variable"),
+                   # "next": roundButton(buttons["next"], "next", tooltip="show defined interface variables")
+                   }
 
-    roundButton(buttons["back"], "back", tooltip="go back")
-    # roundButton(buttons["info"], "info", tooltip="information")
+    for b in buttons:
+      if b not in showButtons:
+        buttons[b].hide()
 
-    # roundButton(buttons["new"], "new", tooltip="new variable")
-    # roundButton(buttons["port"], "port", tooltip="new port variable")
-    for b in hidden:
-      buttons[b].hide()
     self.variable_list = []
     self.hide_columns = hide_columns
 

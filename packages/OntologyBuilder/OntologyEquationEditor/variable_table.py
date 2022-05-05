@@ -14,14 +14,16 @@
 __author__ = 'Preisig, Heinz A'
 
 MAX_HEIGHT = 800
-MAX_WIDTH  = 1000
+MAX_WIDTH = 1000
 
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 
+from Common.common_resources import CONNECTION_NETWORK_SEPARATOR
+from Common.common_resources import VARIABLE_TYPE_INTERFACES
 from Common.ui_text_browser_popup_impl import UI_FileDisplayWindow
-from OntologyBuilder.OntologyEquationEditor.resources import renderIndexListFromGlobalIDToInternal
 from OntologyBuilder.OntologyEquationEditor.resources import TOOLTIPS
+from OntologyBuilder.OntologyEquationEditor.resources import renderIndexListFromGlobalIDToInternal
 from OntologyBuilder.OntologyEquationEditor.ui_variabletable import Ui_Dialog
 
 
@@ -71,10 +73,19 @@ class VariableTable(QtWidgets.QDialog):
     self.reset_table()
     self.hide()
 
-  #
+    #
+    self.buttons = {
+            "back" : self.ui.pushFinished,
+            "info" : self.ui.pushInfo,
+            "new"  : self.ui.pushNew,
+            "port" : self.ui.pushPort,
+            "LaTex": self.ui.pushLaTex,
+            "dot"  : self.ui.pushDot,
+            "next" : self.ui.pushNext,
+            }
 
   def reset_table(self):
-    self.variables.indexVariables()                 # this was a hard one
+    self.variables.indexVariables()  # this was a hard one
     self.ui.tableVariable.clearContents()
     self.ui.tableVariable.setRowCount(0)
     self.makeTable()
@@ -103,6 +114,16 @@ class VariableTable(QtWidgets.QDialog):
     # NOTE: fix since update did not work.
     if self.what == "variable_picking":
       self.variable_space = self.variables.index_accessible_variables_on_networks
+    elif self.what == "interface_picking": #RULE: variable space for interface is the left variables
+      self.variable_space={}
+      self.variable_space[self.network] = {}
+      for i in self.enabled_variable_types:
+        self.variable_space[self.network][i] =[]
+      for ID in self.variables:
+        v = self.variables[ID]
+        left_nw, right_nw = self.network.split(CONNECTION_NETWORK_SEPARATOR)
+        if v.network == left_nw:
+          self.variable_space[self.network][v.type].append(ID)
     else:
       self.variable_space = self.variables.index_networks_for_variable
 
@@ -133,11 +154,11 @@ class VariableTable(QtWidgets.QDialog):
           self.__addQtTableItem(tab, v.type, rowCount, 0)
           self.__addQtTableItem(tab, symbol, rowCount, 1)
           self.__addQtTableItem(tab, v.doc, rowCount, 2)
-          toks=""
+          toks = ""
           for t in v.tokens:
             toks += t.strip("[],")
             toks += ","
-          toks = toks[:-1] # remove last ,
+          toks = toks[:-1]  # remove last ,
           self.__addQtTableItem(tab, toks, rowCount, 3)
           self.__addQtTableItem(tab, v.units.prettyPrintUIString(), rowCount, 4)
           # index_structures_labels = [self.indices[ind_ID]["label"] for ind_ID in v.index_structures]
@@ -186,11 +207,9 @@ class VariableTable(QtWidgets.QDialog):
       height += tab.rowHeight(i)
     height += tab.horizontalHeader().sizeHint().height()
     height += tab.frameWidth() * 2
-    if height > MAX_HEIGHT :
+    if height > MAX_HEIGHT:
       height += tab.horizontalScrollBar().sizeHint().height()
     height -= 0  # NOTE: manual fix
-
-
 
     return QtCore.QSize(width, min(height, MAX_HEIGHT))
 
@@ -199,7 +218,6 @@ class VariableTable(QtWidgets.QDialog):
     item = QtWidgets.QTableWidgetItem(s)
     tab.setRowCount(row + 1)
     tab.setItem(row, col, item)
-
 
   def on_pushInfo_pressed(self):
     msg_popup = UI_FileDisplayWindow(self.info_file)

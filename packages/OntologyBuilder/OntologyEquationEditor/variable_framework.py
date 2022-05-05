@@ -662,7 +662,7 @@ class Variables(OrderedDict):
     # .interconnection_network_dictionary.keys())
     self.heirs_network_dictionary = ontology_container.heirs_network_dictionary
     self.ProMoIRI = self.ontology_container.ProMoIRI
-    self.global_name_space = self.ontology_container.rules["name_space"]
+    # self.global_name_space = self.ontology_container.rules["name_space"]
 
     # keep track of changes and additions
     # self.changes = TrackChanges()
@@ -781,6 +781,7 @@ class Variables(OrderedDict):
               self.index_networks_for_variable[i_nw][variable_class].append(ID)
 
     for nw in self.interconnection_networks:
+      left_nw, right_nw = nw.split(CONNECTION_NETWORK_SEPARATOR)
       self.index_networks_for_variable[nw] = {}
       for variable_class in self.ontology_container.variable_types_on_interfaces[nw]:
         if variable_class not in self.index_networks_for_variable[nw]:
@@ -855,11 +856,11 @@ class Variables(OrderedDict):
       else:
         space = self.heirs_network_dictionary[definition_network]
         self.nameSpacesForVariableLabel[label][no + 1] = space
-      if self.global_name_space:
-        if label in self.nameSpacesForVariableLabelGlobal:
-          raise VarError(" label already exists")
-        else:
-          self.nameSpacesForVariableLabelGlobal.append(label)
+      # if self.global_name_space:
+      #   if label in self.nameSpacesForVariableLabelGlobal:
+      #     raise VarError(" label already exists")
+      #   else:
+        self.nameSpacesForVariableLabelGlobal.append(label)
 
     acc = {}
     for nw in self.networks:
@@ -877,29 +878,29 @@ class Variables(OrderedDict):
     # inter_connections = False
     # if inter_connections :
 
-    if not self.global_name_space:
-      for nw in self.interconnection_networks:
-        acc[nw] = {}
-        for variable_class in self.ontology_container.variable_types_on_interfaces[nw]:
-          if variable_class not in acc[nw]:
-            acc[nw][variable_class] = []
-          for ID in self:
-            if self[ID].type == variable_class:
-              if self[ID].network == nw:
-                acc[nw][variable_class].append(ID)
-        [source, sink] = nw.split(CONNECTION_NETWORK_SEPARATOR)
-        for variable_class in acc[source]:
-          if variable_class not in acc[nw]:
-            acc[nw][variable_class] = []
-          acc[nw][variable_class].extend(acc[source][variable_class])
+    # if not self.global_name_space:
+    for nw in self.interconnection_networks:
+      acc[nw] = {}
+      for variable_class in self.ontology_container.variable_types_on_interfaces[nw]:
+        if variable_class not in acc[nw]:
+          acc[nw][variable_class] = []
+        for ID in self:
+          if self[ID].type == variable_class:
+            if self[ID].network == nw:
+              acc[nw][variable_class].append(ID)
+      [source, sink] = nw.split(CONNECTION_NETWORK_SEPARATOR)
+      for variable_class in acc[source]:
+        if variable_class not in acc[nw]:
+          acc[nw][variable_class] = []
+        acc[nw][variable_class].extend(acc[source][variable_class])
 
-    else:
-      for nw in self.interconnection_networks:
-        left_nw, right_nw = nw.split(CONNECTION_NETWORK_SEPARATOR)
-        for variable_class in self.ontology_container.variable_types_on_networks[right_nw]:
-          if variable_class not in acc[left_nw]:
-            acc[left_nw][variable_class] = []
-          acc[left_nw][variable_class].extend(acc[right_nw][variable_class])
+    # else:
+    #   for nw in self.interconnection_networks:
+    #     left_nw, right_nw = nw.split(CONNECTION_NETWORK_SEPARATOR)
+    #     for variable_class in self.ontology_container.variable_types_on_networks[right_nw]:
+    #       if variable_class not in acc[left_nw]:
+    #         acc[left_nw][variable_class] = []
+    #       acc[left_nw][variable_class].extend(acc[right_nw][variable_class])
 
 
     for nw in self.intraconnection_networks:
@@ -919,10 +920,10 @@ class Variables(OrderedDict):
     for nw in self.ontology_container.interface_networks_accessible_to_networks_dictionary:
       for i_nw in self.ontology_container.interface_networks_accessible_to_networks_dictionary[nw]:
         for ID in self:
-          # if ID == 107:
-          #   print("debugg")
+          print("network -- ", self[ID].network)
           if self[ID].network == i_nw:
             for variable_class in self.ontology_container.variable_types_on_interfaces[i_nw]:
+              print("debugg variable class", variable_class)
               if variable_class not in acc[nw]:
                 acc[nw][variable_class] = []
               acc[nw][variable_class].append(ID)

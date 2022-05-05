@@ -1111,16 +1111,17 @@ class UI_EditorFoundationOntology(QtWidgets.QMainWindow):
         rules[r] = RULES[r]
 
 
-    if not rules["name_space"]:
-      answ = makeMessageBox(message="use GLOBAL name space?",
-                                buttons=["YES", "NO"],
-                                infotext="choose if the equation ontology is based on a global name space or a discipline local one""message")
-      if answ == "YES":
-        print("chosen yes ")
-        rules["name_space"] = True
-      else:
-        print("chosen no ")
-        rules["name_space"] = False
+    # if not rules["name_space"]:
+    #   answ = makeMessageBox(message="use GLOBAL name space?",
+    #                             buttons=["YES", "NO"],
+    #                             infotext="choose if the equation ontology is based on a global name space or a discipline local one""message")
+    #   if answ == "YES":
+    #     print("chosen yes ")
+    #     rules["name_space"] = True
+    #   else:
+    #     print("chosen no ")
+    #     rules["name_space"] = False
+    # rules["name_space"] = False
 
   def on_pushSave_pressed(self):
     self.__ui_status("saved")

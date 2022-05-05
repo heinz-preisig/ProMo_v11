@@ -43,6 +43,7 @@ ICONS["save_as"] = "save_as_button_hap.svg"
 ICONS["plus"] = "plus_button_hap.svg"
 ICONS["LaTex"] = "latex_button_hap.svg"
 ICONS["update"] = "update_button_hap.svg"
+ICONS["next"] = "next_button_hap.svg"
 
 size = 52
 BUTTON_ICON_SIZE = QtCore.QSize(size, size)
