@@ -1172,6 +1172,11 @@ class OntologyContainer():
       equation_information[count] = (eq_ID, var_ID, var_type, nw_eq, equation_label)
     return equations, equation_information, equation_inverse_index
 
+  def addVariable(self, ID, **args):
+    self.variables[ID]={}
+    for i in args:
+      self.variables[ID][i]=args[i]
+
   def writeMe(self):
 
     # container = OrderedDict({

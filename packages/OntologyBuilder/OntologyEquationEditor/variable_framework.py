@@ -697,6 +697,7 @@ class Variables(OrderedDict):
     if ID:
       self[ID] = PhysicalVariable(**kwargs)  # NOTE: no check on existence done -- must happen on defining
       self[ID].indices = self.ontology_container.indices  # variable does not know the indices dictionary on definition.
+      self.ontology_container.addVariable(ID, **kwargs)
       # self.indexVariables()
       # self.changes["variables"].add(ID)
     else:
@@ -714,10 +715,6 @@ class Variables(OrderedDict):
     for ID in variables:
       variables[ID]["indices"] = indices
       self[ID] = PhysicalVariable(**variables[ID])
-      # self.changes["variables"].importID(ID)
-    # for ID in variables:
-    #   for eq_ID in variables[ID]["equations"]:
-        # self.changes["equations"].importID(eq_ID)
 
     self.indexVariables()
 
@@ -964,6 +961,7 @@ class Variables(OrderedDict):
     """
     # print("debugging -- remove variable ", variable_ID, self[variable_ID].label)
     del self[variable_ID]
+    del self.ontology_container.variables[variable_ID]
     # self.changes["variables"].remove(variable_ID)
     self.indexVariables()
 

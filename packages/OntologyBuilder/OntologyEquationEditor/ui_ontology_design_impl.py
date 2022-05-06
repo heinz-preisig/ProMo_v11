@@ -177,7 +177,7 @@ class UiOntologyDesign(QMainWindow):
     self.variables = Variables(self.ontology_container)
     self.variables.importVariables(self.ontology_container.variables,
                                    self.indices)  # also link the indices for compilation
-
+    
     self.state = "edit"
 
     # setup for next GUI-phase
@@ -472,19 +472,9 @@ class UiOntologyDesign(QMainWindow):
     not_yet_defined_variables = list(not_yet_defined_variables)
     return already_defined_variables, not_yet_defined_variables
 
-  # def makeLinkEquation(self, list):
   def makeLinkEquation(self, var_ID):
-    # print("debugging -- link equation : %s := %s"%(list[1], list[0]))
-    # self.variables[list[0]].language = "global_ID"
-    # rhs = str(self.variables[list[0]])
-    # print("debugging -- rhs :", rhs)
-    #
-    # left_ID = int(list[0])
-    # right_ID = int(list[1])
 
-    # link_equation = makeLinkEquationRecord(lhs_ID=list[1], rhs_ID=list[0], network=self.current_network,
-    #                                        incidence_list=self.variables[list[0]].index_structures)
-
+    variables = self.ontology_container.variables
     self.variables[var_ID].language = "global_ID"
     rhs = str(self.variables[var_ID])
     symbol = self.variables[var_ID].label
@@ -521,6 +511,7 @@ class UiOntologyDesign(QMainWindow):
                                                  )
 
     self.variables.addNewVariable(ID=new_var_ID, **variable_record)
+
     self.ontology_container.indexEquations()
     self.variables.indexVariables()
     self.pick.close()

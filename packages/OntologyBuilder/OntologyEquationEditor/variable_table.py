@@ -115,6 +115,12 @@ class VariableTable(QtWidgets.QDialog):
     if self.what == "variable_picking":
       self.variable_space = self.variables.index_accessible_variables_on_networks
     elif self.what == "interface_picking": #RULE: variable space for interface is the left variables
+
+    # NOTE: that's to cruel
+    # left_nw, right_nw = self.network.split(CONNECTION_NETWORK_SEPARATOR)
+    # self.variable_space[self.network] = self.variables.index_networks_for_variable[left_nw]
+
+    # NOTE: that's probably right
       self.variable_space={}
       self.variable_space[self.network] = {}
       for i in self.enabled_variable_types:
@@ -124,6 +130,7 @@ class VariableTable(QtWidgets.QDialog):
         left_nw, right_nw = self.network.split(CONNECTION_NETWORK_SEPARATOR)
         if v.network == left_nw:
           self.variable_space[self.network][v.type].append(ID)
+
     else:
       self.variable_space = self.variables.index_networks_for_variable
 

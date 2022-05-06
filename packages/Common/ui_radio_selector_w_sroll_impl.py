@@ -16,6 +16,7 @@ from collections import OrderedDict
 
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
+from Common.resources_icons import roundButton
 
 from Common.ui_radio_selector_w_scroll import Ui_Form
 
@@ -41,6 +42,8 @@ class UI_RadioSelector(QtWidgets.QDialog):
     self.ui = Ui_Form()
     self.ui.setupUi(self)
     self.radioButton = {}
+
+    roundButton(self.ui.pushButton,"back", tooltip="close and submit the chosen set")
 
     self.setup(initialise=True)
 
@@ -104,6 +107,9 @@ class UI_RadioSelector(QtWidgets.QDialog):
 
   def getMarked(self):
     return self.checked
+
+  def on_pushButton_pressed(self):
+    self.close()
 
 
 if __name__ == '__main__':
