@@ -57,7 +57,7 @@
      <rect>
       <x>430</x>
       <y>0</y>
-      <width>178</width>
+      <width>229</width>
       <height>61</height>
      </rect>
     </property>
@@ -105,6 +105,53 @@ color :rgb(255, 255, 255)</string>
        <property name="styleSheet">
         <string notr="true">background-color: rgb(255, 17, 0);
 color:rgb(255, 255, 255)</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushCancel">
+       <property name="palette">
+        <palette>
+         <active>
+          <colorrole role="Button">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>239</red>
+             <green>41</green>
+             <blue>41</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </active>
+         <inactive>
+          <colorrole role="Button">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>239</red>
+             <green>41</green>
+             <blue>41</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </inactive>
+         <disabled>
+          <colorrole role="Button">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>239</red>
+             <green>41</green>
+             <blue>41</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </disabled>
+        </palette>
+       </property>
+       <property name="toolTip">
+        <string>reset closes equation editor clears alias table</string>
        </property>
        <property name="text">
         <string/>
@@ -285,18 +332,7 @@ color :rgb(255, 255, 255)</string>
      </spacer>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="QPushButton" name="pushCancel">
-        <property name="toolTip">
-         <string>reset closes equation editor clears alias table</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <layout class="QHBoxLayout" name="horizontalLayout"/>
     </item>
    </layout>
   </widget>

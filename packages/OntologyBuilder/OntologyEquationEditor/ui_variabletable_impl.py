@@ -35,6 +35,7 @@ from OntologyBuilder.OntologyEquationEditor.ui_symbol_impl import UI_SymbolDialo
 from OntologyBuilder.OntologyEquationEditor.variable_framework import simulateDeletion
 from OntologyBuilder.OntologyEquationEditor.variable_framework import Units
 from OntologyBuilder.OntologyEquationEditor.variable_table import VariableTable
+from Common.pop_up_message_box import makeMessageBox
 
 
 class UI_VariableTableDialog(VariableTable):
@@ -148,11 +149,9 @@ class UI_VariableTableDialog(VariableTable):
   def __showDeleteDialog(self, selected_ID):
     port_variable = self.variables[selected_ID].port_variable
     if port_variable:
-      reply1 = QtWidgets.QMessageBox.question(self, "choose", "this is a port variable -- do you want to delete it ?",
-                                              YES, NO)
-      if reply1 == NO:
+      reply = makeMessageBox("this is a port variable -- do you want to delete it ?",buttons=["NO","YES"])
+      if reply == 'NO':
         return
-    del reply1
 
     var_symbol = self.variables[selected_ID].label
     msg = "deleting variable : %s" % var_symbol
@@ -160,13 +159,11 @@ class UI_VariableTableDialog(VariableTable):
     v = d_vars_text[1:-1].replace("\n", ",  ")
     e = d_equs_text.replace("\n", "\n   ")
     msg += "\n\nand consequently \n...variables:%s \n\n...equations %s" % (v, e)
-
-    reply2 = QtWidgets.QMessageBox.question(self, "choose                             ", msg, YES, NO)
-    if reply2 == YES:
+    reply = makeMessageBox(msg, buttons=["NO", "YES"])
+    if reply == "YES":
       # print("debugging -- yes")
       self.__deleteVariable(d_vars, d_equs)
       self.reset_table()
-    del reply2
 
   def __deleteVariable(self, d_vars, d_equs):
     print("going to delete: \n...variables:%s \n...equations %s" % (d_vars, d_equs))

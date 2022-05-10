@@ -114,8 +114,8 @@ def makeIncidenceDictionaries(variables):
   incidence_dictionary = {}
   inv_incidence_dictionary_set = {v: set() for v in variables.keys()}
   for v in variables:
-    if v == 18:
-      print("debugging")
+    # if v == 18:
+    #   print("debugging")
     try:
       equations = variables[v].equations  # variables as class Variables
     except:
@@ -917,10 +917,10 @@ class Variables(OrderedDict):
     for nw in self.ontology_container.interface_networks_accessible_to_networks_dictionary:
       for i_nw in self.ontology_container.interface_networks_accessible_to_networks_dictionary[nw]:
         for ID in self:
-          print("network -- ", self[ID].network)
+          # print("network -- ", self[ID].network)
           if self[ID].network == i_nw:
             for variable_class in self.ontology_container.variable_types_on_interfaces[i_nw]:
-              print("debugg variable class", variable_class)
+              # print("debugg variable class", variable_class)
               if variable_class not in acc[nw]:
                 acc[nw][variable_class] = []
               acc[nw][variable_class].append(ID)
