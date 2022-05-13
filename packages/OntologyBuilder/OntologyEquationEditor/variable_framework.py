@@ -939,12 +939,36 @@ class Variables(OrderedDict):
           # print("debugging token found in equation")
           self.tokens_linked[token] = ID
 
-    return
+
 
   # def indexEquationsInNetworks(self):
   #   self.index_equation_in_definition_network = {}
   #   for nw in self.networks + self.interconnection_networks:
   #     self.index_equation_in_definition_network[nw] = []
+    return
+
+  def variableSpaces(self, which, network, enabled_variable_types, rule=""):
+
+    if which == "variable_picking":
+      variable_space = self.index_accessible_variables_on_networks
+    elif which == "interface_picking":
+      left_nw, right_nw = network.split(CONNECTION_NETWORK_SEPARATOR)
+      if rule == "only local":
+        variable_space={}
+        variable_space[network] = {}
+        for i in enabled_variable_types:
+          variable_space[network][i] =[]
+        for ID in self:
+          v = self[ID]
+          if v.network == left_nw:
+            variable_space[network][v.type].append(ID)
+      else:
+        variable_space = self.index_accessible_variables_on_networks
+    else:
+      variable_space = self.index_networks_for_variable
+
+    return variable_space
+
 
   def changeVariableAlias(self, variable_ID, language, new_alias):
     self[variable_ID].aliases[language] = new_alias

@@ -111,28 +111,31 @@ class VariableTable(QtWidgets.QDialog):
           pass
 
   def makeTable(self):
-    # NOTE: fix since update did not work.
-    if self.what == "variable_picking":
-      self.variable_space = self.variables.index_accessible_variables_on_networks
-    elif self.what == "interface_picking": #RULE: variable space for interface is the left variables
+    # Note: variable space generation has been centralised
+    self.variable_space = self.variables.variableSpaces(self.what, self.network, self.enabled_variable_types)
 
-    # NOTE: that's to cruel
-    # left_nw, right_nw = self.network.split(CONNECTION_NETWORK_SEPARATOR)
-    # self.variable_space[self.network] = self.variables.index_networks_for_variable[left_nw]
-
-    # NOTE: that's probably right
-      self.variable_space={}
-      self.variable_space[self.network] = {}
-      for i in self.enabled_variable_types:
-        self.variable_space[self.network][i] =[]
-      for ID in self.variables:
-        v = self.variables[ID]
-        left_nw, right_nw = self.network.split(CONNECTION_NETWORK_SEPARATOR)
-        if v.network == left_nw:
-          self.variable_space[self.network][v.type].append(ID)
-
-    else:
-      self.variable_space = self.variables.index_networks_for_variable
+    # # NOTE: fix since update did not work.
+    # if self.what == "variable_picking":
+    #   self.variable_space = self.variables.variableSpaces(self.what, self.network, self.enabled_variable_types) #self.variables.index_accessible_variables_on_networks
+    # elif self.what == "interface_picking": #RULE: variable space for interface is the left variables
+    #
+    # # NOTE: that's to cruel
+    # # left_nw, right_nw = self.network.split(CONNECTION_NETWORK_SEPARATOR)
+    # # self.variable_space[self.network] = self.variables.index_networks_for_variable[left_nw]
+    #
+    # # NOTE: that's probably right
+    #   self.variable_space={}
+    #   self.variable_space[self.network] = {}
+    #   for i in self.enabled_variable_types:
+    #     self.variable_space[self.network][i] =[]
+    #   for ID in self.variables:
+    #     v = self.variables[ID]
+    #     left_nw, right_nw = self.network.split(CONNECTION_NETWORK_SEPARATOR)
+    #     if v.network == left_nw:
+    #       self.variable_space[self.network][v.type].append(ID)
+    #
+    # else:
+    #   self.variable_space = self.variables.index_networks_for_variable
 
     tab = self.ui.tableVariable
     tab.clearContents()
