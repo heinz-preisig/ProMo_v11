@@ -23,29 +23,29 @@ import os
 import subprocess
 from collections import OrderedDict
 
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import QMainWindow
-from PyQt5.QtWidgets import QProgressDialog
-from PyQt5.QtWidgets import QSizePolicy
 from jinja2 import Environment  # sudo apt-get install python-jinja2
 from jinja2 import FileSystemLoader
 from pydotplus.graphviz import Cluster
 from pydotplus.graphviz import Dot
 from pydotplus.graphviz import Edge
 from pydotplus.graphviz import Node
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QProgressDialog
+from PyQt5.QtWidgets import QSizePolicy
 
 from Common.common_resources import CONNECTION_NETWORK_SEPARATOR
-from Common.common_resources import UI_String
-from Common.common_resources import VARIABLE_TYPE_INTERFACES
 from Common.common_resources import getData
 from Common.common_resources import getOntologyName
 from Common.common_resources import makeTreeView
 from Common.common_resources import putData
 from Common.common_resources import saveBackupFile
+from Common.common_resources import UI_String
+from Common.common_resources import VARIABLE_TYPE_INTERFACES
 from Common.ontology_container import OntologyContainer
-from Common.record_definitions import RecordIndex
 from Common.record_definitions import makeCompletEquationRecord
 from Common.record_definitions import makeCompleteVariableRecord
+from Common.record_definitions import RecordIndex
 from Common.resource_initialisation import DIRECTORIES
 from Common.resource_initialisation import FILES
 from Common.resources_icons import getIcon
@@ -68,12 +68,12 @@ from OntologyBuilder.OntologyEquationEditor.ui_ontology_design import Ui_Ontolog
 from OntologyBuilder.OntologyEquationEditor.ui_variabletable_impl import UI_VariableTableDialog
 from OntologyBuilder.OntologyEquationEditor.ui_variabletable_show_impl import UI_VariableTableShow
 from OntologyBuilder.OntologyEquationEditor.variable_framework import IndexStructureError
-from OntologyBuilder.OntologyEquationEditor.variable_framework import UnitError
-from OntologyBuilder.OntologyEquationEditor.variable_framework import VarError
-from OntologyBuilder.OntologyEquationEditor.variable_framework import Variables  # Indices
 from OntologyBuilder.OntologyEquationEditor.variable_framework import makeCompiler
 from OntologyBuilder.OntologyEquationEditor.variable_framework import makeIncidenceDictionaries
 from OntologyBuilder.OntologyEquationEditor.variable_framework import makeIncidentList
+from OntologyBuilder.OntologyEquationEditor.variable_framework import UnitError
+from OntologyBuilder.OntologyEquationEditor.variable_framework import VarError
+from OntologyBuilder.OntologyEquationEditor.variable_framework import Variables  # Indices
 
 # RULE: fixed wired for initialisation -- needs to be more generic
 INITIALVARIABLE_TYPES = {
@@ -177,7 +177,7 @@ class UiOntologyDesign(QMainWindow):
     self.variables = Variables(self.ontology_container)
     self.variables.importVariables(self.ontology_container.variables,
                                    self.indices)  # also link the indices for compilation
-    
+
     self.state = "edit"
 
     # setup for next GUI-phase
