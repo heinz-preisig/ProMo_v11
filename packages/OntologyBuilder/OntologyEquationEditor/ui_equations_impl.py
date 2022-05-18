@@ -293,7 +293,7 @@ class UI_Equations(QtWidgets.QWidget):
     self.ui.pushDeleteEquation.hide()
 
   def on_lineNewVariable_textChanged(self, text):
-    print("debugging -- text change", text)
+    # print("debugging -- text change", text)
     if not self.status_new_variable:
       return
     #rule: changed from local name space to global name space

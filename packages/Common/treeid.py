@@ -650,23 +650,23 @@ if __name__ == '__main__':
   tree.mapMe()
   tree.printMe()
 
-  # g = ObjectTree('ontology')
-  # g.addChildtoNode('physical', 'ontology')
-  # g.addChildtoNode('solid', 'physical')
-  # g.addChildtoNode('phasea', 'solid')
-  # g.addChildtoNode('phaseb', 'solid')
-  # g.addChildtoNode('phasec', 'solid')
-  # g.addChildtoNode('liquid', 'physical')
-  # g.addChildtoNode('solid', 'physical')
-  # g.addChildtoNode('information', 'ontology')
-  # g.addChildtoNode('discrete','information')
-  # g.addChildtoNode('continuous','information')
-  #
+  g = ObjectTree('ontology')
+  g.addChildtoNode('physical', 'ontology')
+  g.addChildtoNode('solid', 'physical')
+  g.addChildtoNode('phasea', 'solid')
+  g.addChildtoNode('phaseb', 'solid')
+  g.addChildtoNode('phasec', 'solid')
+  g.addChildtoNode('liquid', 'physical')
+  g.addChildtoNode('solid', 'physical')
+  g.addChildtoNode('information', 'ontology')
+  g.addChildtoNode('discrete','information')
+  g.addChildtoNode('continuous','information')
+
   # g.tree.printMe()
-  #
-  # tags, IDs = g.getLeaves(0)
-  # print(tags)
-  #
-  # for i in tags:
-  #   ancestor_tags = g.getAncestors(i)
-  #   print((i, ' - ', ancestor_tags))
+
+  tags, IDs = g.getLeaves(0)
+  print(tags)
+
+  for i in tags:
+    ancestor_tags = g.getAncestors(i)
+    print((i, ' - ', ancestor_tags))

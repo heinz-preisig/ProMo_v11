@@ -1679,7 +1679,17 @@ class ReduceBlockProduct(BinaryOperator):
     s_index_a = set(a.index_structures)
     s_index_b = set(b.index_structures)
 
+
     to_reduce_index_list = self.space.indices[self.product_index_ID]["indices"]
+
+
+    # Rule: two cases :
+    # Rule: A_S_x  reduce over S in B_xS_y
+    # Rule: A_xS_y reduce over S in B_xS_z
+
+    if (self.reducing_index_ID not in s_index_a) or (self.reducing_index_ID not in s_index_a):
+      if self.product_index_ID not in a.index_structures:
+        raise IndexStructureError("the reducing index must be in the first index set and in the reduce index set.")
 
     if to_reduce_index_list.count(self.reducing_index_ID) > 0:
       index_structures = []  # list(index_structures)

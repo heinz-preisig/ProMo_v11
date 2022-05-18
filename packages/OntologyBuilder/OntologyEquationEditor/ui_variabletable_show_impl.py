@@ -87,6 +87,8 @@ class UI_VariableTableShow(VariableTable):
     buttons = self.buttons
 
     showButtons = {"back": roundButton(buttons["back"], "back", tooltip="go back"),
+                   "LaTex": roundButton(buttons["LaTex"], "LaTex", tooltip="make LaTeX document"),
+                   "dot": roundButton(buttons["dot"], "dot_graph", tooltip="show graph"),
                    # "info": roundButton(buttons["info"], "info", tooltip="information"),
                    # "new" : roundButton(buttons["new"], "dependent_variable", tooltip="new dependent variable"),
                    # "port": roundButton(buttons["port"], "port", tooltip="new port variable"),
@@ -94,7 +96,10 @@ class UI_VariableTableShow(VariableTable):
 
     for b in buttons:
       if b not in showButtons:
+        print("debugging -- hide button", b)
         buttons[b].hide()
+
+    buttons["LaTex"].hide()
 
     # buttons = {}
     # buttons["back"] = self.ui.pushFinished
