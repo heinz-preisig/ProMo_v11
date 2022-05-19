@@ -658,11 +658,12 @@ if __name__ == '__main__':
   g.addChildtoNode('phasec', 'solid')
   g.addChildtoNode('liquid', 'physical')
   g.addChildtoNode('solid', 'physical')
+  g.addChildtoNode('solid', 'gas')
   g.addChildtoNode('information', 'ontology')
   g.addChildtoNode('discrete','information')
   g.addChildtoNode('continuous','information')
 
-  # g.tree.printMe()
+  g.tree.printMe()
 
   tags, IDs = g.getLeaves(0)
   print(tags)
