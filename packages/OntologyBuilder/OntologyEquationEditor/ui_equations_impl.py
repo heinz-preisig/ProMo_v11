@@ -17,32 +17,27 @@ __version__ = "6.00"
 __email__ = "heinz.preisig@chemeng.ntnu.no"
 __status__ = "beta"
 
-import os
-import subprocess
-
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 
 from Common.common_resources import CONNECTION_NETWORK_SEPARATOR
-from Common.common_resources import getData
-from Common.record_definitions import makeCompletEquationRecord
-from Common.record_definitions import makeCompleteVariableRecord
 # from Common.common_resources import globalEquationID
 # from Common.common_resources import globalVariableID
 from Common.record_definitions import RecordEquation
-from Common.resource_initialisation import DIRECTORIES
-from Common.resource_initialisation import FILES
+from Common.record_definitions import makeCompletEquationRecord
+from Common.record_definitions import makeCompleteVariableRecord
 from Common.resources_icons import roundButton
 from Common.single_list_selector_impl import SingleListSelector
+from OntologyBuilder.OntologyEquationEditor.resources import INSTANTIATE_EQ_NO
 from OntologyBuilder.OntologyEquationEditor.resources import NEW_EQ
 from OntologyBuilder.OntologyEquationEditor.resources import NEW_VAR
 from OntologyBuilder.OntologyEquationEditor.resources import OPERATOR_SNIPS
 from OntologyBuilder.OntologyEquationEditor.resources import PORT
+from OntologyBuilder.OntologyEquationEditor.resources import TEMPLATES
+from OntologyBuilder.OntologyEquationEditor.resources import UNDEF_EQ_NO
 from OntologyBuilder.OntologyEquationEditor.resources import renderExpressionFromGlobalIDToInternal
 from OntologyBuilder.OntologyEquationEditor.resources import renderIndexListFromGlobalIDToInternal
 from OntologyBuilder.OntologyEquationEditor.resources import setValidator
-from OntologyBuilder.OntologyEquationEditor.resources import TEMPLATES
-from OntologyBuilder.OntologyEquationEditor.resources import UNDEF_EQ_NO
 from OntologyBuilder.OntologyEquationEditor.tpg import LexicalError
 from OntologyBuilder.OntologyEquationEditor.tpg import SemanticError
 from OntologyBuilder.OntologyEquationEditor.tpg import SyntacticError
@@ -52,10 +47,10 @@ from OntologyBuilder.OntologyEquationEditor.ui_variabletable_pick_impl import UI
 from OntologyBuilder.OntologyEquationEditor.variable_framework import CompileSpace
 from OntologyBuilder.OntologyEquationEditor.variable_framework import Expression
 from OntologyBuilder.OntologyEquationEditor.variable_framework import IndexStructureError
-from OntologyBuilder.OntologyEquationEditor.variable_framework import makeIncidentList
 from OntologyBuilder.OntologyEquationEditor.variable_framework import UnitError
 from OntologyBuilder.OntologyEquationEditor.variable_framework import Units
 from OntologyBuilder.OntologyEquationEditor.variable_framework import VarError
+from OntologyBuilder.OntologyEquationEditor.variable_framework import makeIncidentList
 
 
 class UI_Equations(QtWidgets.QWidget):
@@ -257,7 +252,7 @@ class UI_Equations(QtWidgets.QWidget):
     self.MSG("new equation")
 
   def on_lineNewVariable_returnPressed(self):  # TODO: check on validator
-    symbol = str(self.ui.lineNewVariable.text()) # RULE: changed from local name space to global name space
+    symbol = str(self.ui.lineNewVariable.text())  # RULE: changed from local name space to global name space
     # if self.global_name_space:
     #   test = self.variables.existSymbolGlobal(symbol)
     # else:
@@ -296,13 +291,13 @@ class UI_Equations(QtWidgets.QWidget):
     # print("debugging -- text change", text)
     if not self.status_new_variable:
       return
-    #rule: changed from local name space to global name space
+    # rule: changed from local name space to global name space
     # rule enable both
     # if self.global_name_space:
     #   test = self.variables.existSymbolGlobal(text)
     # else:
     test = self.variables.existSymbol(self.network_for_variable, text)
-    if test: #     if :
+    if test:  # if :
       self.MSG("variable already defined")
     else:
       self.MSG("OK")
@@ -430,7 +425,8 @@ class UI_Equations(QtWidgets.QWidget):
     #  computations sequence
     # RULE: we do not care anymore maintaining the sequence. The bipartite graph analysis takes care of sequencing
 
-    print("status new variable, new equation, edit expression", self.status_new_variable, self.status_new_equation, self.status_edit_expr)
+    print("status new variable, new equation, edit expression", self.status_new_variable, self.status_new_equation,
+          self.status_edit_expr)
 
     log = (self.status_new_variable, self.status_new_equation, self.status_edit_expr)
     # new variable true, true, false
@@ -467,7 +463,7 @@ class UI_Equations(QtWidgets.QWidget):
     elif log == (False, False, True):
       var_ID = self.selected_variable_ID
       old_equ_ID = self.current_eq_ID
-    # RULE: editing replaces the existing equation -- consquence - sequence is not retained.
+      # RULE: editing replaces the existing equation -- consquence - sequence is not retained.
       self.variables.replaceEquation(var_ID, old_equ_ID, equation_record)
 
     self.variables.indexVariables()
@@ -532,7 +528,7 @@ class UI_Equations(QtWidgets.QWidget):
     equation_list = sorted(v.equations.keys())
     # print('debugging - got dictionary')
     # _list = [UNDEF_EQ_NO + TEMPLATES['Equation_definition_delimiter'] + NEW_EQ]
-    _list = [ask_string % (UNDEF_EQ_NO, lhs, NEW_EQ)]
+    _list = [ask_string % (UNDEF_EQ_NO, lhs, NEW_EQ), INSTANTIATE_EQ_NO]
     for alterntative in equation_list:
       rhs = self.variables[variable_ID].equations[alterntative]["rhs"]
       equ_rendered = renderExpressionFromGlobalIDToInternal(rhs, self.variables, self.indices)
@@ -586,4 +582,3 @@ class UI_Equations(QtWidgets.QWidget):
   def on_pushCancel_pressed(self):
     self.resetEquationInterface()
     self.close()
-
