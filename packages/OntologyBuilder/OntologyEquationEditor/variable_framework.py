@@ -845,19 +845,22 @@ class Variables(OrderedDict):
       if label not in self.nameSpacesForVariableLabel:
         self.nameSpacesForVariableLabel[label] = {}
         no = 0
+        self.nameSpacesForVariableLabel[label][no] = []
       else:
         no = len(self.nameSpacesForVariableLabel[label].keys())
       definition_network = self[ID].network
       if CONNECTION_NETWORK_SEPARATOR in definition_network:  # Rule: No inheritance for interfaces
-        pass
+        if no not in self.nameSpacesForVariableLabel[label]:
+          self.nameSpacesForVariableLabel[label][no] = []
+        self.nameSpacesForVariableLabel[label][no].append(definition_network)
       else:
         space = self.heirs_network_dictionary[definition_network]
-        self.nameSpacesForVariableLabel[label][no + 1] = space
+        self.nameSpacesForVariableLabel[label][no + 1] = copy.copy(space)
       # if self.global_name_space:
       #   if label in self.nameSpacesForVariableLabelGlobal:
       #     raise VarError(" label already exists")
       #   else:
-        self.nameSpacesForVariableLabelGlobal.append(label)
+      #   self.nameSpacesForVariableLabelGlobal.append(label)
 
     acc = {}
     for nw in self.networks:
@@ -1031,6 +1034,13 @@ class Variables(OrderedDict):
     for name_space in self.nameSpacesForVariableLabel[label]:
       if network in self.nameSpacesForVariableLabel[label][name_space]:
         return True
+      else:
+        for nw in self.nameSpacesForVariableLabel[label][name_space]:
+          if CONNECTION_NETWORK_SEPARATOR in nw:
+            _,rnw = nw.split(CONNECTION_NETWORK_SEPARATOR)
+            if rnw == network:
+              return True
+
     return False
 
   def existSymbolGlobal(self, label):
@@ -1639,7 +1649,8 @@ class ReduceProduct(BinaryOperator):
       msg = "reduce index %s is not in index list of the second argument" % self.index
       msg += "\n first argument indices : %s" % pretty_a_indices
       msg += "\n second argument indices: %s" % pretty_b_indices
-      raise IndexStructureError(msg)
+      print(msg)
+      # raise IndexStructureError(msg)
     # self.index_structures = sorted(s_index_a.symmetric_difference(s_index_b))
     self.index_structures = sorted((s_index_a | s_index_b) - set([self.index]))
 

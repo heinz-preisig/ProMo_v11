@@ -28,7 +28,7 @@ from Common.record_definitions import makeCompletEquationRecord
 from Common.record_definitions import makeCompleteVariableRecord
 from Common.resources_icons import roundButton
 from Common.single_list_selector_impl import SingleListSelector
-from OntologyBuilder.OntologyEquationEditor.resources import INSTANTIATE_EQ_NO
+# from OntologyBuilder.OntologyEquationEditor.resources import INSTANTIATE_EQ_NO
 from OntologyBuilder.OntologyEquationEditor.resources import NEW_EQ
 from OntologyBuilder.OntologyEquationEditor.resources import NEW_VAR
 from OntologyBuilder.OntologyEquationEditor.resources import OPERATOR_SNIPS
@@ -528,7 +528,7 @@ class UI_Equations(QtWidgets.QWidget):
     equation_list = sorted(v.equations.keys())
     # print('debugging - got dictionary')
     # _list = [UNDEF_EQ_NO + TEMPLATES['Equation_definition_delimiter'] + NEW_EQ]
-    _list = [ask_string % (UNDEF_EQ_NO, lhs, NEW_EQ), INSTANTIATE_EQ_NO]
+    _list = [ask_string % (UNDEF_EQ_NO, lhs, NEW_EQ)]
     for alterntative in equation_list:
       rhs = self.variables[variable_ID].equations[alterntative]["rhs"]
       equ_rendered = renderExpressionFromGlobalIDToInternal(rhs, self.variables, self.indices)

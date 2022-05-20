@@ -495,7 +495,7 @@ class UiOntologyDesign(QMainWindow):
     new_equ_ID = self.variables.newProMoEquationIRI()  # globalEquationID(update=True)  # RULE: for global ID
 
     variable_record = makeCompleteVariableRecord(new_var_ID,
-                                                 label=symbol,
+                                                 label="_%s"%symbol,
                                                  type=variable_type,
                                                  network=self.current_network,
                                                  doc="link variable %s to interface %s" % (
