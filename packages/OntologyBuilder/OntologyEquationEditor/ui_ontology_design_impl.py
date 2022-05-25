@@ -74,6 +74,7 @@ from OntologyBuilder.OntologyEquationEditor.variable_framework import makeIncide
 from OntologyBuilder.OntologyEquationEditor.variable_framework import UnitError
 from OntologyBuilder.OntologyEquationEditor.variable_framework import VarError
 from OntologyBuilder.OntologyEquationEditor.variable_framework import Variables  # Indices
+from OntologyBuilder.OntologyEquationEditor.ui_variabletable_instantiate import UI_VariableTableInterfaceInstantiate
 
 # RULE: fixed wired for initialisation -- needs to be more generic
 INITIALVARIABLE_TYPES = {
@@ -135,6 +136,7 @@ class UiOntologyDesign(QMainWindow):
 
     self.ui.groupFiles.hide()
     self.ui.groupVariables.hide()
+    self.ui.pushInstantiate.hide()
 
     try:
       assert os.path.exists(DIRECTORIES["ontology_repository"])
@@ -261,7 +263,7 @@ class UiOntologyDesign(QMainWindow):
     self.__writeMessage("edit alias table")
     self.ui.groupVariables.hide()
     self.__setupIndicesAliasTable()
-    # self.ontology_container.indices = self.indices #(self.indices, ["index", "block_index"])
+
 
   def on_pushAddIndex_pressed(self):
     print("debugging __ adding index")
@@ -297,6 +299,31 @@ class UiOntologyDesign(QMainWindow):
       indices[index_counter]["aliases"][language] = a
 
       print("debugging -- new index defined:", new_index)
+
+
+  def on_pushInstantiate_pressed(self):
+    # print("debugging -- not yet implemented pushInstantiate")
+    variables_not_instantiated = self.variables.indexInstantiated(self.current_network)
+    # if self.current_network in self.ontology_container.interfaces:
+    #   print("debugging")
+    #   enabled_var_types = VARIABLE_TYPE_INTERFACES
+    # else:
+    #   enabled_var_types = self.variable_types_on_networks[self.current_network]
+    enabled_var_types = self.variable_types_on_networks[self.current_network]
+    self.variables.indexVariables()
+    variable_table = UI_VariableTableInterfaceInstantiate("All not instantiated variables",
+                                          self.ontology_container,
+                                          self.variables,
+                                          self.current_network,
+                                          enabled_var_types,
+                                          [],
+                                          [3],
+                                          None,
+                                          ["info", "new", "port", "LaTex", "dot"],
+                                                          variable_IDs = variables_not_instantiated
+                                          )
+    variable_table.exec_()
+
 
   def on_pushCompile_pressed(self):
     # self.__checkRadios("compile")
@@ -383,6 +410,7 @@ class UiOntologyDesign(QMainWindow):
         self.ui.pushAddIndex.show()
       else:
         self.ui.pushAddIndex.hide()
+    self.ui.pushInstantiate.show()
 
   @QtCore.pyqtSlot(str)
   def on_combo_InterConnectionNetwork_activated(self, choice):

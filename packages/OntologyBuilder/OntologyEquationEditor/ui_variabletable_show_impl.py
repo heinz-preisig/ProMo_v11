@@ -43,9 +43,7 @@ class UI_VariableTableShow(VariableTable):
                title,
                ontology_container,  #
                variables,
-               # indices,
                network,
-               # ontology_name,
                enabled_types=['ALL'],
                hide_vars=[],
                hide_columns=[3],
@@ -77,7 +75,6 @@ class UI_VariableTableShow(VariableTable):
                            variables,
                            ontology_container.indices,
                            network,
-                           # variables.index_accessible_variables_on_networks,
                            enabled_types,
                            hide_vars,
                            hide_columns,

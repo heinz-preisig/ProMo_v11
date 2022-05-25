@@ -45,7 +45,6 @@ class VariableTable(QtWidgets.QDialog):
                variables,
                indices,
                network,
-               # variable_space,
                enabled_variable_types,
                hide_vars,
                hide_columns,
@@ -59,7 +58,10 @@ class VariableTable(QtWidgets.QDialog):
     if what == "variable_picking":  # NOTE: Python issue. Is not updated when making table. ???
       self.variable_space = variables.index_accessible_variables_on_networks
     else:
-      self.variable_space = variables.index_networks_for_variable
+      try:
+        self.variable_space = variables.index_networks_for_variable
+      except:
+        self.variables.indexVariables()
     # self.variable_space = variable_space
     self.enabled_variable_types = enabled_variable_types
     self.hide_vars = hide_vars
@@ -137,21 +139,43 @@ class VariableTable(QtWidgets.QDialog):
     # else:
     #   self.variable_space = self.variables.index_networks_for_variable
 
-    tab = self.ui.tableVariable
-    tab.clearContents()
-    rowCount = 0
-    variable_ID_list = set()
+    variable_ID_list = self.makeVariableIDList()
 
+    table = self.ui.tableVariable
+
+    variable_ID_list = self.populateTable(table, variable_ID_list)
+
+    self.variables_in_table = list(variable_ID_list)
+
+    for c in self.hide_columns:
+      self.ui.tableVariable.hideColumn(c)
+
+    # fitting window
+    table.resizeColumnsToContents()
+    table.resizeRowsToContents()
+    t = self.__tabSizeHint()
+    table.resize(t)
+    x = t.width() + table.x() + 12
+    y = table.y() + table.height() + 12
+    s = QtCore.QSize(x, y)
+    self.resize(s)
+
+  def makeVariableIDList(self):
+    variable_ID_list = set()
     nw = self.network
     for variable_type in self.variable_space[nw]:  # self.variables.index_accessible_variables_on_networks[nw]:
       if variable_type in self.enabled_variable_types:
         # for i in self.variables.index_accessible_variables_on_networks[nw][variable_type]:
         for i in self.variable_space[nw][variable_type]:
           variable_ID_list.add(i)
+    return variable_ID_list
 
+  def populateTable(self, table, variable_ID_list):
+    table.clearContents()
+    rowCount = 0
     if not variable_ID_list:
       if rowCount == 0:  # Note: only add one for an empty list
-        self.__addQtTableItem(tab, self.enabled_variable_types[0], rowCount, 0)
+        self.__addQtTableItem(table, self.enabled_variable_types[0], rowCount, 0)
         rowCount += 1
       variable_ID_list = []
     else:
@@ -161,39 +185,25 @@ class VariableTable(QtWidgets.QDialog):
           v = self.variables[ID]
           index_structures_labels = renderIndexListFromGlobalIDToInternal(v.index_structures, self.indices)
           # print("debugging -- adding variable ", ID, symbol)
-          self.__addQtTableItem(tab, v.type, rowCount, 0)
-          self.__addQtTableItem(tab, symbol, rowCount, 1)
-          self.__addQtTableItem(tab, v.doc, rowCount, 2)
+          self.__addQtTableItem(table, v.type, rowCount, 0)
+          self.__addQtTableItem(table, symbol, rowCount, 1)
+          self.__addQtTableItem(table, v.doc, rowCount, 2)
           toks = ""
           for t in v.tokens:
             toks += t.strip("[],")
             toks += ","
           toks = toks[:-1]  # remove last ,
-          self.__addQtTableItem(tab, toks, rowCount, 3)
-          self.__addQtTableItem(tab, v.units.prettyPrintUIString(), rowCount, 4)
+          self.__addQtTableItem(table, toks, rowCount, 3)
+          self.__addQtTableItem(table, v.units.prettyPrintUIString(), rowCount, 4)
           # index_structures_labels = [self.indices[ind_ID]["label"] for ind_ID in v.index_structures]
-          self.__addQtTableItem(tab, str(index_structures_labels), rowCount, 5)
+          self.__addQtTableItem(table, str(index_structures_labels), rowCount, 5)
           _l = len(v.equations)
-          self.__addQtTableItem(tab, str(_l), rowCount, 6)
-          self.__addQtTableItem(tab, 'x', rowCount, 7)
-          self.__addQtTableItem(tab, v.network, rowCount, 8)
-          self.__addQtTableItem(tab, str(ID), rowCount, 9)
+          self.__addQtTableItem(table, str(_l), rowCount, 6)
+          self.__addQtTableItem(table, 'x', rowCount, 7)
+          self.__addQtTableItem(table, v.network, rowCount, 8)
+          self.__addQtTableItem(table, str(ID), rowCount, 9)
           rowCount += 1
-
-    self.variables_in_table = list(variable_ID_list)
-
-    for c in self.hide_columns:
-      self.ui.tableVariable.hideColumn(c)
-
-    # fitting window
-    tab.resizeColumnsToContents()
-    tab.resizeRowsToContents()
-    t = self.__tabSizeHint()
-    tab.resize(t)
-    x = t.width() + tab.x() + 12
-    y = tab.y() + tab.height() + 12
-    s = QtCore.QSize(x, y)
-    self.resize(s)
+    return variable_ID_list
 
   def hideVars(self, list_of_IDs):
     for id in self.variables_in_table:

@@ -950,6 +950,18 @@ class Variables(OrderedDict):
   #     self.index_equation_in_definition_network[nw] = []
     return
 
+  def indexInstantiated(self, network):
+    variables_not_instantiate = []
+    a = CODE["global_ID"]["operator"]["Instantiate"]
+    for var_ID in self:
+      for eq_ID in self[var_ID].equations:
+        if self[var_ID].equations[eq_ID]["network"] == network:
+          if a in self[var_ID].equations[eq_ID]["rhs"]:
+            # print("debugging ", var_ID, eq_ID)
+            variables_not_instantiate.append(var_ID)
+    return variables_not_instantiate
+
+
   def variableSpaces(self, which, network, enabled_variable_types, rule=""):
 
     if which == "variable_picking":
