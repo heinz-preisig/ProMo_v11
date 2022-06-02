@@ -52,14 +52,14 @@ from OntologyBuilder.OntologyEquationEditor.resources import CODE
 from OntologyBuilder.OntologyEquationEditor.resources import ID_delimiter
 from OntologyBuilder.OntologyEquationEditor.resources import ID_spacer
 from OntologyBuilder.OntologyEquationEditor.resources import LANGUAGES
-from OntologyBuilder.OntologyEquationEditor.resources import renderExpressionFromGlobalIDToInternal
-from OntologyBuilder.OntologyEquationEditor.resources import renderIndexListFromGlobalIDToInternal
-from OntologyBuilder.OntologyEquationEditor.resources import TEMP_VARIABLE
 from OntologyBuilder.OntologyEquationEditor.resources import TEMPLATES
+from OntologyBuilder.OntologyEquationEditor.resources import TEMP_VARIABLE
 from OntologyBuilder.OntologyEquationEditor.resources import UNITARY_INVERSE_UNITS
 from OntologyBuilder.OntologyEquationEditor.resources import UNITARY_LOOSE_UNITS
 from OntologyBuilder.OntologyEquationEditor.resources import UNITARY_NO_UNITS
 from OntologyBuilder.OntologyEquationEditor.resources import UNITARY_RETAIN_UNITS
+from OntologyBuilder.OntologyEquationEditor.resources import renderExpressionFromGlobalIDToInternal
+from OntologyBuilder.OntologyEquationEditor.resources import renderIndexListFromGlobalIDToInternal
 from OntologyBuilder.OntologyEquationEditor.tpg import *
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -128,7 +128,7 @@ def makeIncidenceDictionaries(variables):
       equations[e]["incidence_list"] = inc_list
 
   for e in incidence_dictionary:
-    var,inc_list = incidence_dictionary[e]
+    var, inc_list = incidence_dictionary[e]
     for i in inc_list:
       inv_incidence_dictionary_set[int(i)].add(e)
 
@@ -136,7 +136,8 @@ def makeIncidenceDictionaries(variables):
   for e in inv_incidence_dictionary_set:
     inv_incidence_dictionary[e] = sorted(inv_incidence_dictionary_set[e])
 
-  return incidence_dictionary, inv_incidence_dictionary #_set
+  return incidence_dictionary, inv_incidence_dictionary  # _set
+
 
 def makeIncidentList(equation_ID_coded_string):
   """
@@ -206,9 +207,7 @@ def stringBinaryOperation(language, operation, left, right,
     b = "%s" % right.__str__()
   if index:  # If index present >> reduceproduct  index is the ID
     res_index_structure = []  # Resulting index sets
-    index_compiled = indices[index]["aliases"][language]
-    if language == LANGUAGES["global_ID"]:
-      index_compiled = " %s" % index_compiled  # Note: nasty fix  aliases do not have the space in front of the "I_"
+    index_compiled = compile_index(index, indices, language)
     if language in LANGUAGES["matrix_form"]:
       try:
         left_transpose = left.index_structures.index(index) == 0
@@ -250,6 +249,13 @@ def stringBinaryOperation(language, operation, left, right,
   else:
     s = CODE[language][operation] % (a, b)
   return s
+
+
+def compile_index(index, indices, language):
+  index_compiled = indices[index]["aliases"][language]
+  if language == LANGUAGES["global_ID"]:
+    index_compiled = " %s" % index_compiled  # Note: nasty fix  aliases do not have the space in front of the "I_"
+  return index_compiled
 
 
 def simulateDeletion(variables, var_ID, indices):
@@ -309,7 +315,7 @@ def reduceVars(inv_incidence_dictionary, variables, incidence_dictionary, d_vars
     if eq_id not in d_equs:
       d_equs.add(eq_id)
       if var.type == "state":
-          return  # Way out
+        return  # Way out
       else:
         lhs, incidence_list = incidence_dictionary[eq_id]
         reduceVars(inv_incidence_dictionary, variables, incidence_dictionary, d_vars, d_equs, lhs)
@@ -378,6 +384,7 @@ def iterateBipartiteGraph(inv_incidence_dictionary, variables, incidence_diction
       lhs, incidence_list = incidence_dictionary[eq_id]
       iterateBipartiteGraph(inv_incidence_dictionary, variables, incidence_dictionary, d_vars, d_equs, lhs)
 
+
 #################################################
 
 def makeCompiler(variables, indices, var_ID, equ_ID, language, verbose=0):
@@ -396,6 +403,22 @@ def makeCompiler(variables, indices, var_ID, equ_ID, language, verbose=0):
                                language=language)
   return Expression(compile_space, verbose=verbose)
 
+
+#
+# def reduce_index(a, b, index_ID, space):
+#   s_index_a = set(a.index_structures)
+#   s_index_b = set(b.index_structures)
+#   if (index_ID not in b.index_structures) or (index_ID not in a.index_structures):
+#     pretty_a_indices = renderIndexListFromGlobalIDToInternal(s_index_a, space.indices)
+#     pretty_b_indices = renderIndexListFromGlobalIDToInternal(s_index_b, space.indices)
+#     msg = "reduce index %s is not in index list of the second argument" % index_ID
+#     msg += "\n first argument indices : %s" % pretty_a_indices
+#     msg += "\n second argument indices: %s" % pretty_b_indices
+#     print(msg)
+#     # raise IndexStructureError(msg)
+#   # self.index_structures = sorted(s_index_a.symmetric_difference(s_index_b))
+#   index_structures = sorted((s_index_a | s_index_b) - {index_ID})
+#   return index_structures, s_index_a, s_index_b
 
 # =============================================================================
 # error classes
@@ -525,6 +548,21 @@ class Units():
 
   def __eq__(self, other):
     return self.asList() == other.asList()
+
+  def product(self, factor):
+    u_list = self.asList()
+    u = [ i * factor for i in u_list]
+    units = Units(ALL=u)
+    # units.time = factor * int(self.time)
+    # units.lenth = factor * int(self.length)
+    # units.amount = factor * int(self.amount)
+    # units.mass = factor * self.mass
+    # units.temperature = factor * self.temperature
+    # units.current = factor * self.current
+    # units.light = factor * self.light
+    # units.nil = copy.copy(self.nil)
+
+    return units
 
   def asDictionary(self):
     return self.__dict__
@@ -902,7 +940,6 @@ class Variables(OrderedDict):
     #         acc[left_nw][variable_class] = []
     #       acc[left_nw][variable_class].extend(acc[right_nw][variable_class])
 
-
     for nw in self.intraconnection_networks:
       acc[nw] = {}
       [source, sink] = nw.split(CONNECTION_NETWORK_SEPARATOR)
@@ -915,7 +952,6 @@ class Variables(OrderedDict):
           acc[nw][variable_class] = sorted(_set_source | _set_sink | _set_self)
         else:
           acc[nw][variable_class] = acc[sink]
-
 
     for nw in self.ontology_container.interface_networks_accessible_to_networks_dictionary:
       for i_nw in self.ontology_container.interface_networks_accessible_to_networks_dictionary[nw]:
@@ -933,7 +969,7 @@ class Variables(OrderedDict):
         acc[nw][variable_class] = list(set(acc[nw][variable_class]))
     self.index_accessible_variables_on_networks = acc
 
-    self.tokens_linked = {}          # RULE: this assumes that the token names are unique
+    self.tokens_linked = {}  # RULE: this assumes that the token names are unique
     for token in self.ontology_container.tokens:
       self.tokens_linked[token] = None
       # print("debugging tokens", nw, tokens)
@@ -942,12 +978,10 @@ class Variables(OrderedDict):
           # print("debugging token found in equation")
           self.tokens_linked[token] = ID
 
-
-
-  # def indexEquationsInNetworks(self):
-  #   self.index_equation_in_definition_network = {}
-  #   for nw in self.networks + self.interconnection_networks:
-  #     self.index_equation_in_definition_network[nw] = []
+    # def indexEquationsInNetworks(self):
+    #   self.index_equation_in_definition_network = {}
+    #   for nw in self.networks + self.interconnection_networks:
+    #     self.index_equation_in_definition_network[nw] = []
     return
 
   def indexInstantiated(self, network):
@@ -961,7 +995,6 @@ class Variables(OrderedDict):
             variables_not_instantiate.append(var_ID)
     return variables_not_instantiate
 
-
   def variableSpaces(self, which, network, enabled_variable_types, rule=""):
 
     if which == "variable_picking":
@@ -969,10 +1002,10 @@ class Variables(OrderedDict):
     elif which == "interface_picking":
       left_nw, right_nw = network.split(CONNECTION_NETWORK_SEPARATOR)
       if rule == "only local":
-        variable_space={}
+        variable_space = {}
         variable_space[network] = {}
         for i in enabled_variable_types:
-          variable_space[network][i] =[]
+          variable_space[network][i] = []
         for ID in self:
           v = self[ID]
           if v.network == left_nw:
@@ -983,7 +1016,6 @@ class Variables(OrderedDict):
       variable_space = self.index_networks_for_variable
 
     return variable_space
-
 
   def changeVariableAlias(self, variable_ID, language, new_alias):
     self[variable_ID].aliases[language] = new_alias
@@ -1030,7 +1062,7 @@ class Variables(OrderedDict):
 
   def replaceEquation(self, var_ID, old_equ_ID, equation_record):
     variable_record = self[var_ID]
-    variable_record.equations[old_equ_ID]=equation_record
+    variable_record.equations[old_equ_ID] = equation_record
     print("debugging -- replace equation")
 
   def existSymbol(self, network, label):
@@ -1049,7 +1081,7 @@ class Variables(OrderedDict):
       else:
         for nw in self.nameSpacesForVariableLabel[label][name_space]:
           if CONNECTION_NETWORK_SEPARATOR in nw:
-            _,rnw = nw.split(CONNECTION_NETWORK_SEPARATOR)
+            _, rnw = nw.split(CONNECTION_NETWORK_SEPARATOR)
             if rnw == network:
               return True
 
@@ -1058,7 +1090,6 @@ class Variables(OrderedDict):
   def existSymbolGlobal(self, label):
     log = label in self.nameSpacesForVariableLabelGlobal
     return log
-
 
   def getVariableList(self, network):
     """
@@ -1159,7 +1190,6 @@ class CompileSpace:
 
     accessible_variable_space = []
 
-
     self.variable_definition_network = variable_definition_network
     self.expression_definition_network = expression_definition_network
 
@@ -1189,7 +1219,7 @@ class CompileSpace:
         for var_ID in self.variables.index_accessible_variables_on_networks[nw][variable_class]:
           if symbol == self.variables[var_ID].label:
             #   print("found %s"%symbol)
-            v_list.add(var_ID) #self.variables[var_ID])
+            v_list.add(var_ID)  # self.variables[var_ID])
 
     v_list = sorted(v_list)
 
@@ -1201,7 +1231,7 @@ class CompileSpace:
     elif len(v_list) > 1:
       for i in v_list:
         if (self.variables[i].network == self.variable_definition_network) or \
-          (self.variables[i].network == self.expression_definition_network):
+                (self.variables[i].network == self.expression_definition_network):
           v = self.variables[i]
     else:
       print("did not find %s in language %s" % (symbol, self.language))
@@ -1344,11 +1374,11 @@ class Operator(PhysicalVariable):
     b_set = set(b.tokens)
     token = index["tokens"]
     if token:
-      c = sorted(a_set|b_set)                           # RULE: for tokens to reduce define A,B :: tokens
-      if (token in a.tokens) and (token in b.tokens):   # RULE:  A,B red(B) A,B --> A
+      c = sorted(a_set | b_set)  # RULE: for tokens to reduce define A,B :: tokens
+      if (token in a.tokens) and (token in b.tokens):  # RULE:  A,B red(B) A,B --> A
         c.remove(token)
       else:
-        c_set = a_set.symmetric_difference(b_set)       # RULE: A red(A) A,B -- B
+        c_set = a_set.symmetric_difference(b_set)  # RULE: A red(A) A,B -- B
         c = sorted(c_set)
     else:
       c_set = a_set.symmetric_difference(b_set)
@@ -1502,6 +1532,49 @@ class Operator(PhysicalVariable):
 
     return sorted(list(_s))
 
+  def reduce_index(self, a, b, index):
+
+    try:
+      self.index_ID = self.space.inverse_indices[index]
+    except:
+      raise IndexStructureError(" no such index %s" % index)
+
+    s_index_a = set(a.index_structures)
+    s_index_b = set(b.index_structures)
+    if (self.index_ID not in b.index_structures) or (self.index_ID not in a.index_structures):
+      pretty_a_indices = renderIndexListFromGlobalIDToInternal(s_index_a, self.space.indices)
+      pretty_b_indices = renderIndexListFromGlobalIDToInternal(s_index_b, self.space.indices)
+      msg = "reduce index %s is not in index list of the second argument" % self.index_ID
+      msg += "\n first argument indices : %s" % pretty_a_indices
+      msg += "\n second argument indices: %s" % pretty_b_indices
+      print(msg)
+      # raise IndexStructureError(msg)
+    # self.index_structures = sorted(s_index_a.symmetric_difference(s_index_b))
+    self.index_structures = sorted((s_index_a | s_index_b) - {self.index_ID})
+    return  s_index_a, s_index_b
+
+  def single_reduce_index(self, a, index):
+    try:
+      self.index_ID = self.space.inverse_indices[index]
+    except:
+      raise IndexStructureError(" no such index %s" % index)
+    s_index_a = set(a.index_structures)
+    if self.index_ID not in a.index_structures:
+      pretty_a_indices = renderIndexListFromGlobalIDToInternal(s_index_a, self.space.indices)
+      msg = "reduce index %s is not in index list of the argument" % self.index_ID
+      msg += "\n first argument indices : %s" % pretty_a_indices
+      print(msg)
+      self.index_structures = []
+
+    else:
+      self.index_structures = sorted(s_index_a - {self.index_ID})
+      # print("debugging")
+
+  def has_equal_index_structures(self, a,b):
+    if a.index_structures != b.index_structures:
+      raise IndexStructureError("not equal %s != %s" %(a.index_structures, b.index_structures))
+      return False
+    return True
 
 class UnitOperator(Operator):
   def __init__(self, op, space):
@@ -1594,14 +1667,9 @@ class KhatriRao(BinaryOperator):
     """
 
     BinaryOperator.__init__(self, op, a, b, space)
-
     self.units = a.units * b.units
-
-    # pattern recognition
     self.index_structures = sorted(self.Khatri_Rao_indexing(a, b))
-
     self.tokens = self.mergeTokens([a, b])
-
     return
 
   def __str__(self):  # Str version of the object
@@ -1631,50 +1699,24 @@ class KhatriRao(BinaryOperator):
 class ReduceProduct(BinaryOperator):
   def __init__(self, op, a, b, index, space):
     """
-    Binary operator
-    operator:
-    .index. :: matrix product reducing over the index
-
-    @param op: string:: the operator
-    @param a: variable:: left one
-    @param b: variable:: right one
-    @param prec: precedence
+    standard matrix product with the index defining which dimension is to be reduced.
     """
     # print("this is the reduce product")
 
+
     BinaryOperator.__init__(self, op, a, b, space)
-    # for i in self.space.inverse_indices.keys():
-    #   if i == index:
-    #     print("debugging found key")
-    #   else:
-    #     print("debugging not this one : ", i, index)
-    try:
-      self.index = self.space.inverse_indices[index]
-    except:
-      raise IndexStructureError(" no such index %s" % index)
+
     self.units = a.units * b.units
-    s_index_a = set(a.index_structures)
-    s_index_b = set(b.index_structures)
-    if (self.index not in b.index_structures) or (self.index not in a.index_structures):
-      pretty_a_indices = renderIndexListFromGlobalIDToInternal(s_index_a, self.space.indices)
-      pretty_b_indices = renderIndexListFromGlobalIDToInternal(s_index_b, self.space.indices)
-      msg = "reduce index %s is not in index list of the second argument" % self.index
-      msg += "\n first argument indices : %s" % pretty_a_indices
-      msg += "\n second argument indices: %s" % pretty_b_indices
-      print(msg)
-      # raise IndexStructureError(msg)
-    # self.index_structures = sorted(s_index_a.symmetric_difference(s_index_b))
-    self.index_structures = sorted((s_index_a | s_index_b) - set([self.index]))
+    s_index_a, s_index_b = self.reduce_index(a, b, index)
 
     red_index = list(s_index_a & s_index_b)[0]
-
     self.tokens = self.reduceTokens(a, b, red_index)
     # print("debugging")
 
   def __str__(self):
     s = stringBinaryOperation(self.space.language, self.op,
                               self.a, self.b,
-                              index=self.index,
+                              index=self.index_ID,
                               indices=self.space.indices
                               )
     return s
@@ -1702,9 +1744,7 @@ class ReduceBlockProduct(BinaryOperator):
     s_index_a = set(a.index_structures)
     s_index_b = set(b.index_structures)
 
-
     to_reduce_index_list = self.space.indices[self.product_index_ID]["indices"]
-
 
     # Rule: two cases :
     # Rule: A_S_x  reduce over S in B_xS_y
@@ -1866,7 +1906,10 @@ class Power(BinaryOperator):
       self.units = a.units
 
     # rule for index structures
-    self.index_structures = sorted(a.index_structures)
+    if self.has_equal_index_structures(a,b):
+      self.index_structures = sorted(a.index_structures)
+    else:
+      self.index_structures = []
     self.tokens = self.copyTokens(a)
 
   def __str__(self):
@@ -2006,11 +2049,11 @@ class Implicit(Operator):
 
     # NOTE: do the checks only with the input language
     if self.space.language == "global_ID":
-      l,r =str(arg).split("_")
+      l, r = str(arg).split("_")
       print("debugging", self.space.language)
       var_function_ID = int(r)
-      self.var_to_solve = self.space.getVariable(self.space.variables.to_define_variable_name) #var_to_solve
-      l,r = str(self.var_to_solve).split("_")
+      self.var_to_solve = self.space.getVariable(self.space.variables.to_define_variable_name)  # var_to_solve
+      l, r = str(self.var_to_solve).split("_")
       var_to_solve_ID = int(r)
 
       if self.var_to_solve.label not in space.eq_variable_incidence_list:
@@ -2018,7 +2061,8 @@ class Implicit(Operator):
         self.msg = 'warning >>> variable %s not in incidence list' % self.var_to_solve
 
       found_vars, found_equs, found_vars_text, found_equs_text = findDependentVariables(self.space.variables,
-                                                                                        var_to_solve_ID, #var_function_ID,
+                                                                                        var_to_solve_ID,
+                                                                                        # var_function_ID,
                                                                                         self.space.indices)
 
       print("debugging -- collect equations for the root expression:", found_vars, found_equs, found_vars_text,
@@ -2039,24 +2083,26 @@ class Implicit(Operator):
 
 class Product(Operator):
   def __init__(self, argument, index, space):
+    """
+    product operator, where 'index' is the running index over which the sequence is reduced
+    """
     Operator.__init__(self, space)
 
     self.argument = argument
     self.index = index
 
-    # units of both basis and  exponent must be zero
-    if (not argument.units.isZero()) or (not index.units.isZero()):
-      raise UnitError('units of basis and exponent must be zero',
-                      argument.units, index.units)
-
-    self.units = copy.deepcopy(argument.units)  # ............................... retains units
-    self.index_structures = sorted(argument.index_structures)  # ................ retain indices
+    _u = argument.units.asList()
+    units = Units(ALL=_u)
+    self.units = units.product(3)
+    self.single_reduce_index(argument, index)
     self.tokens = self.copyTokens(argument)
 
   def __str__(self):
     language = self.space.language
+
+    index = self.space.indices[self.index_ID]["aliases"][language]
     s = CODE[language]["Product"].format(argument=self.argument,
-                                         index=self.index)
+                                         index=index)
     return s
 
 
@@ -2126,7 +2172,7 @@ class UnitaryFunction(Operator):
       self.index_structures = sorted(arg.index_structures)
 
     if fct in UNITARY_LOOSE_UNITS:
-      self.tokens = []              # RULE: they also use the tokens
+      self.tokens = []  # RULE: they also use the tokens
     else:
       self.tokens = self.copyTokens(arg)
 
@@ -2138,6 +2184,7 @@ class UnitaryFunction(Operator):
     except:
       print("debugging -- argument:%s  language:%s" % (self.args, language))
     return CODE[language][self.fct] % (self.args)
+
 
 # class MakeIndex():
 #
@@ -2293,7 +2340,7 @@ class ParDifferential(Operator):
     self.units = Units(ALL=units)
 
     self.index_structures = self.diffFraction_indexing(x, y)
-    self.tokens = self.mergeTokens([x,y])
+    self.tokens = self.mergeTokens([x, y])
 
   def __str__(self):
     return CODE[self.space.language]["ParDiff"] % (self.x, self.y)
@@ -2329,7 +2376,7 @@ class Stack(Operator):
       pretty_a_indices = renderIndexListFromGlobalIDToInternal(self.index_structures, self.space.indices)
       pretty_b_indices = renderIndexListFromGlobalIDToInternal(variable.index_structures, self.space.indices)
       raise IndexStructureError("incompatible index structures in list definition: %s is not equal to: %s"
-                                %(pretty_a_indices,pretty_b_indices))
+                                % (pretty_a_indices, pretty_b_indices))
     else:
       self.variable_list.append(variable)
       self.tokens = self.mergeTokens(self.variable_list)
@@ -2374,9 +2421,9 @@ class MixedStack(Operator):
     s = CODE[language]["MixedStack"] % s_list
     return s
 
+
 class IncidenceMatrix(Operator):
   def __init__(self, N, A, space):
-
     Operator.__init__(self, space)
     self.units = Units()  # RULE: MixedStacks have no units
     self.index_structures = []  # RULE: MixedStacks have no index structures
@@ -2386,9 +2433,6 @@ class IncidenceMatrix(Operator):
   def __str__(self):
     print("debugging -- Incidence matrix")
     return "gotit"
-
-
-
 
 
 # Note: that functions are defined in different places for the time being including resource
@@ -2425,6 +2469,9 @@ class Expression(VerboseParser):
       |DL/op (ProdIndex/i | Variable/i) DL Factor/f                        $t=ReduceProduct(op,t,f,i,self.space)
       )*
   ;
+  Index/u -> ProdIndex/r                                                   $u=r
+              | Variable/m                                                 $u=m
+  ;
   ProdIndex/i -> (Variable/j '&' Variable/k)                               $i = TEMPLATES["block_index"]%(j,k)
   ;
   Identifier/a -> Variable/s                                               $a=self.space.getVariable(s)
@@ -2433,7 +2480,8 @@ class Expression(VerboseParser):
        '\(' Expression/b '\)'                                              $fu=Brackets(b, self.space)
       | 'Integral' '\(' Expression/dx '::'
           Identifier/s IN '\['Identifier/ll ',' Identifier/ul '\]' '\)'    $fu=Integral(dx,s,ll,ul, self.space)
-      | 'Product'  '\(' Expression/a ',' Identifier/u '\)'                 $fu=Product(a, u, self.space)
+      | 'Product'  '\(' Expression/a ',' Index/u '\)'                      $fu=Product(a, u, self.space)
+      | 'Power'/op '\(' Expression/a ',' Expression/b '\)'                 $fu=Power(op, a, b, self.space)
       | 'Root'  '\(' Identifier/a '\)'                                     $fu=Implicit(a, self.space)
       | MaxMin/s   '\(' Expression/a ',' Expression/b '\)'                 $fu=MaxMin(s, a, b, self.space)
       | 'TotalDiff'/f '\(' Expression/x ',' Expression/y '\)'              $fu=TotDifferential(x,y, self.space)
