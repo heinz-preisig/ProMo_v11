@@ -53,7 +53,7 @@ from Common.resources_icons import roundButton
 from Common.ui_text_browser_popup_impl import UI_FileDisplayWindow
 from OntologyBuilder.OntologyEquationEditor.resources import CODE
 from OntologyBuilder.OntologyEquationEditor.resources import ENABLED_COLUMNS
-from OntologyBuilder.OntologyEquationEditor.resources import LANGUAGES
+from OntologyBuilder.OntologyEquationEditor.resources import LANGUAGES, revertInterfaceVariableName, makeInterfaceVariableName
 # from OntologyBuilder.OntologyEquationEditor.resources import make_variable_equation_pngs
 from OntologyBuilder.OntologyEquationEditor.resources import renderExpressionFromGlobalIDToInternal
 from OntologyBuilder.OntologyEquationEditor.tpg import LexicalError
@@ -304,26 +304,20 @@ class UiOntologyDesign(QMainWindow):
   def on_pushInstantiate_pressed(self):
     # print("debugging -- not yet implemented pushInstantiate")
     variables_not_instantiated = self.variables.indexInstantiated(self.current_network)
-    # if self.current_network in self.ontology_container.interfaces:
-    #   print("debugging")
-    #   enabled_var_types = VARIABLE_TYPE_INTERFACES
-    # else:
-    #   enabled_var_types = self.variable_types_on_networks[self.current_network]
     enabled_var_types = self.variable_types_on_networks[self.current_network]
     self.variables.indexVariables()
-    variable_table = UI_VariableTableInterfaceInstantiate("All not instantiated variables",
-                                          self.ontology_container,
+    self.pick_instantiate = UI_VariableTableInterfaceInstantiate("All not instantiated variables",
                                           self.variables,
+                                          self.indices,
                                           self.current_network,
-                                          enabled_var_types,
-                                          [],
-                                          [3],
-                                          None,
-                                          ["info", "new", "port", "LaTex", "dot"],
-                                                          variable_IDs = variables_not_instantiated
+                                          enabled_types = enabled_var_types,
+                                          hide_vars =  [],
+                                          hide_columns = [3],
+                                          info_file = None,
+                                          variable_IDs = variables_not_instantiated
                                           )
-    variable_table.exec_()
-
+    self.pick_instantiate.picked.connect(self.__makeInstantiationEquation)
+    self.pick_instantiate.exec_()
 
   def on_pushCompile_pressed(self):
     # self.__checkRadios("compile")
@@ -476,7 +470,7 @@ class UiOntologyDesign(QMainWindow):
                                               self.current_network,
                                               hide_vars=already_defined_variables,
                                               enabled_types=enabled_var_classes)
-    self.pick.picked.connect(self.makeLinkEquation)
+    self.pick.picked.connect(self.__makeLinkEquation)
     self.pick.exec_()
     # self.show_interface_variables = UI_VariableTableInterfacePick("show interface variables",
     #                                           self.variables, self.indices,
@@ -495,12 +489,14 @@ class UiOntologyDesign(QMainWindow):
       all_variables_in_interface.add(symbol)
       if self.variables[var_ID].network == self.current_network:
         already_defined_variables.add(symbol)
+        symbol = revertInterfaceVariableName(symbol)
+        already_defined_variables.add(symbol)
     not_yet_defined_variables = all_variables_in_interface - already_defined_variables
     already_defined_variables = list(already_defined_variables)
     not_yet_defined_variables = list(not_yet_defined_variables)
     return already_defined_variables, not_yet_defined_variables
 
-  def makeLinkEquation(self, var_ID):
+  def __makeLinkEquation(self, var_ID):
 
     variables = self.ontology_container.variables
     self.variables[var_ID].language = "global_ID"
@@ -523,7 +519,7 @@ class UiOntologyDesign(QMainWindow):
     new_equ_ID = self.variables.newProMoEquationIRI()  # globalEquationID(update=True)  # RULE: for global ID
 
     variable_record = makeCompleteVariableRecord(new_var_ID,
-                                                 label="_%s"%symbol,
+                                                 label=makeInterfaceVariableName(symbol),
                                                  type=variable_type,
                                                  network=self.current_network,
                                                  doc="link variable %s to interface %s" % (
@@ -756,8 +752,8 @@ class UiOntologyDesign(QMainWindow):
 
     putData(self.compiled_equations[language], e_name)
 
-    if language == "latex":
-      print("debugging -- processing latex")
+    # if language == "latex":
+    #   print("debugging -- processing latex")
     for var_ID in self.variables:  # used in internally
       self.variables[var_ID].setLanguage(language)
       compiled_label = str(self.variables[var_ID])
@@ -895,6 +891,37 @@ class UiOntologyDesign(QMainWindow):
     prgr_dialog.setMaximum(1000)
     prgr_dialog.setAutoClose(False)
     return prgr_dialog
+
+  def __makeInstantiationEquation(self, var_ID):
+
+    value = "V_0"
+    for ID in self.variables:
+      if self.variables[ID].label == "value":
+        value_ID = ID
+        value = self.variables[ID].aliases["global_ID"]
+
+
+    self.variables[var_ID].language = "global_ID"
+    variable_compiled = self.variables[var_ID].aliases['global_ID']
+    rhs = CODE["global_ID"]["Instantiate"]%(variable_compiled, value )
+
+    # TODO: this variable class/type should be centralised. Is currently hard wired in more than one place.
+    variable_type = VARIABLE_TYPE_INTERFACES
+
+    incident_list = [str(var_ID)]
+    link_equation = makeCompletEquationRecord(rhs=rhs,
+                                              type="instantiation_equation",
+                                              network=self.current_network,
+                                              doc="instantiation equation",
+                                              incidence_list=incident_list)
+
+    self.variables.addEquation(var_ID, link_equation)
+
+    self.ontology_container.indexEquations()
+    self.pick_instantiate.close()
+    self.on_pushInstantiate_pressed()
+    # self.variables.indexVariables()
+    # self.__setupEditInterface()
 
   def __makeVariableEquationPictures(self):
 

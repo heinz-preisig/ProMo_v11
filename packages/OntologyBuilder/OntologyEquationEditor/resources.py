@@ -106,6 +106,7 @@ TEMPLATES["index_diff_state"] = "d%s"
 TEMPLATES["block_index"] = "%s" + BLOCK_INDEX_SEPARATOR + "%s"
 TEMPLATES["conversion_label"] = "%s_conversion"
 TEMPLATES["conversion_alias"] = "C%s"
+TEMPLATES["interface_variable"] = "_%s"
 # TEMPLATES["sub_index"] = "%s_%s"
 
 # differential space
@@ -635,6 +636,11 @@ for c in Special_TEMPLATE:
 
 OPERATOR_SNIPS.append(CODE[internal]["Root"] % ('expression to be explicit in var'))
 
+def makeInterfaceVariableName(symbol):
+  return TEMPLATES["interface_variable"]%symbol
+
+def revertInterfaceVariableName(symbol):
+  return symbol[1:]
 
 def setValidator(lineEdit):
   validator = QtGui.QRegExpValidator(VAR_REG_EXPR, lineEdit)
@@ -719,152 +725,6 @@ def renderIndexListFromGlobalIDToInternal(indexList, indices):
     count += 1
 
   return s
-
-#
-# def make_variable_equation_pngs(variables, ontology_container):
-#   """
-#   generates pictures of the equations extracting the latex code from the latex equation file
-#   """
-#   make_equation_pngs(ontology_container)
-#   make_variable_pngs(variables, ontology_container)
-#
-#
-# def make_equation_pngs(ontology_container, source=None, ID=None):
-#   """
-#   undefined source takes the data from the compiled file, thus the equations_latex.json file
-#   otherwise it is taken from the variables dictionary being physical variables
-#   """
-#   ontology_name = ontology_container.ontology_name
-#   ontology_location = DIRECTORIES["ontology_location"] % ontology_name
-#   f_name = FILES["pnglatex"]
-#   header = __makeHeader(ontology_name)
-#
-#   if not source:
-#     eqs = {}
-#     latex_file = os.path.join(DIRECTORIES["ontology_location"] % ontology_name, "equations_latex.json")
-#     latex_translations = getData(latex_file)
-#     for eq_ID_str in latex_translations:
-#       eq_ID = int(eq_ID_str)
-#       if ID:
-#         e = latex_translations[ID]
-#         eqs[ID] = r"%s = %s" % (e["lhs"], e["rhs"])
-#         break
-#       else:
-#         e = latex_translations[eq_ID_str]
-#         eqs[eq_ID] = r"%s = %s" % (e["lhs"], e["rhs"])
-#
-#
-#   for eq_ID in eqs:
-#     out = os.path.join(ontology_location, "LaTeX", "equation_%s.png" % eq_ID)
-#     args = ['bash', f_name, "-P5", "-H", header, "-o", out, "-f", eqs[eq_ID],
-#             ontology_location]
-#
-#     try:  # reports an error after completing the last one -- no idea
-#       make_it = subprocess.Popen(
-#               args,
-#               start_new_session=True,
-#               # restore_signals=False,
-#               # stdout=subprocess.PIPE,
-#               # stderr=subprocess.PIPE
-#               )
-#       out, error = make_it.communicate()
-#     except:
-#       print("equation generation failed")
-#       pass
-#
-#
-# def make_variable_pngs(ontology_container, source=None, ID=None):
-#   ontology_name = ontology_container.ontology_name
-#   if not source:
-#     variables = ontology_container.variables
-#   else:
-#     variables = source
-#
-#   f_name = FILES["pnglatex"]
-#   ontology_location = DIRECTORIES["ontology_location"] % ontology_name
-#   header = __makeHeader(ontology_name)
-#   for var_ID in variables:
-#
-#     out = os.path.join(ontology_location, "LaTeX", "variable_%s.png" % var_ID)
-#
-#     if source:
-#       var_latex = variables[var_ID].aliases["latex"]
-#     else:
-#       var_latex = variables[var_ID]["aliases"]["latex"]
-#     print("debugging -->>>>>>>", var_ID, ID)
-#     if var_ID == 117:
-#       print("debugging -->>>>>>>")
-#
-#     if (not ID) or (var_ID == ID) :
-#       print("debugging -->>>>>>>")
-#       args = ['bash', f_name, "-P5", "-H", header, "-o", out, "-f", var_latex,  # lhs[var_ID],
-#               ontology_location]
-#
-#       try:  # reports an error after completing the last one -- no idea
-#         make_it = subprocess.Popen(
-#                 args,
-#                 start_new_session=True,
-#                 restore_signals=False,
-#                 # stdout=subprocess.PIPE,
-#                 # stderr=subprocess.PIPE
-#                 )
-#         out, error = make_it.communicate()
-#         print("debugging -- made:", var_ID)
-#       except:
-#         print("debugging -- failed to make:", var_ID)
-#         pass
-#
-#
-# def __makeHeader(ontology_name):
-#   header = FILES["latex_png_header_file"] % ontology_name
-#   if not os.path.exists(header):
-#     header_file = open(header, 'w')
-#     # RULE: make header for equation and variable latex compilations.
-#     # math packages
-#     # \usepackage{amsmath}
-#     # \usepackage{amssymb}
-#     # \usepackage{calligra}
-#     # \usepackage{array}
-#     # \input{../../Ontology_Repository/HAP_playground_02_extend_ontology/LaTeX/resources/defs.tex}
-#     header_file.write(r"\usepackage{amsmath}")
-#     header_file.write(r"\usepackage{amssymb}")
-#     header_file.write(r"\usepackage{calligra}")
-#     header_file.write(r"\usepackage{array}")
-#     header_file.write(r"\input{../../Ontology_Repository/%s/LaTeX/resources/defs.tex}" % ontology_name)
-#     header_file.close()
-#   return header
-#
-
-# def makeVariables(variables):
-#   lhs = {}
-#   for var_ID in variables:
-#     lhs[var_ID] = variables[var_ID]["aliases"]["latex"]
-#   return lhs
-
-
-# def parseLine(line):
-#   line1 = reader.readline()
-#   arr1 = line1.split('"')
-#   if len(arr1) != 1:
-#     number = int(arr1[1])
-#     line2 = reader.readline()
-#     arr2 = line2.split('"')
-#     lhs = arr2[3]
-#     line3 = reader.readline()
-#     arr3 = line3.split('"')
-#     network = arr3[3]
-#     line4 = reader.readline()
-#     arr4 = line4.split('"')
-#     rhs = arr4[3].replace('\\\\', '\\')
-#     line5 = reader.readline()
-#   else:
-#     number = None
-#     lhs = None
-#     rhs = None
-#     network = None
-#
-#   return number, lhs, rhs, network
-
 
 class  VarEqTree():
   """

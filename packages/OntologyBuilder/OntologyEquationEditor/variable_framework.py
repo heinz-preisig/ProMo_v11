@@ -985,15 +985,21 @@ class Variables(OrderedDict):
     return
 
   def indexInstantiated(self, network):
-    variables_not_instantiate = []
+    all_variables_in_network = set()
+    for ID in self:
+      if self[ID].network == network:
+        all_variables_in_network.add(ID)
+    variables_being_instantiate = set()
     a = CODE["global_ID"]["operator"]["Instantiate"]
     for var_ID in self:
       for eq_ID in self[var_ID].equations:
         if self[var_ID].equations[eq_ID]["network"] == network:
           if a in self[var_ID].equations[eq_ID]["rhs"]:
             # print("debugging ", var_ID, eq_ID)
-            variables_not_instantiate.append(var_ID)
-    return variables_not_instantiate
+            variables_being_instantiate.add(var_ID)
+    variables_not_instantiated = sorted(all_variables_in_network - variables_being_instantiate)
+    return variables_not_instantiated
+
 
   def variableSpaces(self, which, network, enabled_variable_types, rule=""):
 
@@ -2447,7 +2453,6 @@ class Expression(VerboseParser):
   token MaxMin      : '\b(max|min)\b';
   token IN          : '\b(in)\b';
   token Variable    : '[a-zA-Z_]\w*';
-  token RedProd     : '\b(prod)\b';
   token sum         : '[+-]'; # plus minus
   token power       : '\^';   # power
   token dot         : '\.';   # expand product

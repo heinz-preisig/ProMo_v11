@@ -42,7 +42,6 @@ class UI_VariableTableInterfaceInstantiate(VariableTable):
                hide_vars=[],
                hide_columns=[],
                info_file=None,
-               hidden=[],
                variable_IDs = []
                ):
     """
@@ -62,9 +61,12 @@ class UI_VariableTableInterfaceInstantiate(VariableTable):
     -
     """
 
+    self.variable_IDs = variable_IDs
+    self.hide_columns = hide_columns
+
     VariableTable.__init__(self,
                            title,
-                           "interface_picking",
+                           "instantiate",
                            variables,
                            indices,
                            network,
@@ -87,8 +89,6 @@ class UI_VariableTableInterfaceInstantiate(VariableTable):
         buttons[b].hide()
 
     self.variable_list = []
-    self.variable_IDs = variable_IDs
-    self.hide_columns = hide_columns
 
     self.setToolTips('pick')
     self.ui.tableVariable.setToolTip("click on row to copy variable to expression")
